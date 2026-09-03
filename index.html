@@ -12,10 +12,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icon.svg">
-<style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061427}
-iframe{display:block;width:100%;height:100%;border:0}
-</style>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061427}iframe{display:block;width:100%;height:100%;border:0}</style>
 </head>
 <body>
 <iframe id="appFrame" src="app.html" title="Yemek Seçim Sistemi"></iframe>
@@ -26,195 +23,47 @@ frame.addEventListener('load',()=>{
     const d=frame.contentDocument;
     const s=d.createElement('style');
     s.textContent=`
-      .person{
-        position:relative!important;
-        background:#061427!important;
-        isolation:isolate;
-        overflow:hidden;
-      }
-      .person::before{
-        content:"";
-        position:absolute;
-        inset:0;
-        pointer-events:none;
-        z-index:0;
-        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='170' viewBox='0 0 420 170'%3E%3Crect width='420' height='170' fill='none'/%3E%3Cg opacity='1'%3E%3Ctext x='210' y='78' text-anchor='middle' font-family='Arial Black, Arial, sans-serif' font-size='82' font-weight='900' letter-spacing='1' fill='%239b9b9b'%3EKRAW%3C/text%3E%3Cpolygon points='210,88 226,113 194,113' fill='%23e11d2e'/%3E%3Ctext x='210' y='145' text-anchor='middle' font-family='Arial, sans-serif' font-size='38' letter-spacing='2' fill='%239b9b9b'%3EAUTO PARTS%3C/text%3E%3C/g%3E%3C/svg%3E");
-        background-repeat:repeat;
-        background-position:center 20px;
-        background-size:320px 130px;
-        opacity:.24;
-      }
-      .person::after{
-        content:"";
-        position:absolute;
-        inset:0;
-        pointer-events:none;
-        z-index:0;
-        background:linear-gradient(180deg,rgba(6,20,39,.30),rgba(6,20,39,.42));
-      }
-      .person .main{
-        position:relative!important;
-        z-index:1!important;
-        width:calc(100% - 48px)!important;
-        max-width:1400px!important;
-        margin-left:auto!important;
-        margin-right:auto!important;
-        padding-left:0!important;
-        padding-right:0!important;
-      }
+      .person{position:relative!important;background:#061427!important;isolation:isolate;overflow:hidden}
+      .person::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='170' viewBox='0 0 420 170'%3E%3Crect width='420' height='170' fill='none'/%3E%3Cg opacity='1'%3E%3Ctext x='210' y='78' text-anchor='middle' font-family='Arial Black, Arial, sans-serif' font-size='82' font-weight='900' letter-spacing='1' fill='%239b9b9b'%3EKRAW%3C/text%3E%3Cpolygon points='210,88 226,113 194,113' fill='%23e11d2e'/%3E%3Ctext x='210' y='145' text-anchor='middle' font-family='Arial, sans-serif' font-size='38' letter-spacing='2' fill='%239b9b9b'%3EAUTO PARTS%3C/text%3E%3C/g%3E%3C/svg%3E");background-repeat:repeat;background-position:center 20px;background-size:320px 130px;opacity:.24}
+      .person::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:linear-gradient(180deg,rgba(6,20,39,.30),rgba(6,20,39,.42))}
+      .person .main{position:relative!important;z-index:1!important;width:calc(100% - 48px)!important;max-width:1400px!important;margin-left:auto!important;margin-right:auto!important;padding-left:0!important;padding-right:0!important}
       .portiontag{display:inline-block;border-radius:999px;padding:4px 8px;font-weight:700;font-size:12px;background:#eef3f8;color:#334155}
       .portionmodalbg{position:fixed;inset:0;background:#07111dcc;display:grid;place-items:center;padding:18px;z-index:10050}
       .portionmodal{width:min(420px,94vw);background:#fff;color:#172033;border-radius:18px;padding:24px;box-shadow:0 24px 80px #0007;text-align:center}
-      .portionmodal h2{margin:0 0 8px;font-size:23px}
-      .portionmodal p{margin:0 0 18px;color:#617083;line-height:1.45}
-      .portionmodal .portionchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-      .portionmodal .portionchoice{border:1px solid #ccd5e0;background:#f7f9fc;color:#172033;border-radius:10px;padding:13px 8px;font-weight:800;cursor:pointer}
+      .portionmodal h2{margin:0 0 8px;font-size:23px}.portionmodal p{margin:0 0 18px;color:#617083;line-height:1.45}
+      .portionmodal .portionchoices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+      .portionmodal .portionchoice{border:1px solid #ccd5e0;background:#f7f9fc;color:#172033;border-radius:10px;padding:14px 8px;font-weight:800;cursor:pointer}
       .portionmodal .portionchoice.on{background:#2869dc;color:#fff;border-color:#2869dc}
-      @media(max-width:900px){
-        .person::before{
-          background-size:235px 96px;
-          background-position:center 12px;
-          opacity:.20;
-        }
-        .person .main{width:calc(100% - 24px)!important;}
-      }
+      @media(max-width:900px){.person::before{background-size:235px 96px;background-position:center 12px;opacity:.20}.person .main{width:calc(100% - 24px)!important}}
     `;
     d.head.appendChild(s);
 
     const ruleScript=d.createElement('script');
-    ruleScript.textContent=`
-      (function(){
-        const CAT={
-          'Bamya':'sebze','Bezelye':'sebze','Ispanak':'sebze','Mücver':'sebze','Kuru Fasulye':'sebze','Patates Kızartma':'sebze','Mantar':'sebze','Yaprak Sarma':'sebze',
-          'Tavuk Göveç':'tavuk','Tavuk Güveç':'tavuk','Tavuk Piloto':'tavuk','Tavuk Pilato':'tavuk','Tavuk Filato':'tavuk',
-          'Güveç':'et','Çökertme':'et','Rosto':'et',
-          'Kaşarlı Köfte':'kiyma','Izgara Köfte':'kiyma','Musakka':'kiyma','Karnıyarık':'kiyma','Kadın Budu':'kiyma'
-        };
-        const LABEL={sebze:'Sebze',kiyma:'Kıyma',tavuk:'Tavuk',et:'Et'};
-        function allowedForToday(){
-          const date=(typeof S!=='undefined'&&S.today)?new Date(S.today+'T12:00:00'):new Date();
-          const day=date.getDay();
-          if(day===1||day===4)return ['sebze'];
-          if(day===2||day===5)return ['kiyma','tavuk'];
-          if(day===3)return ['et'];
-          return ['sebze','kiyma','tavuk','et'];
-        }
-        function applyRule(){
-          if(typeof S==='undefined'||!S.user||S.user.role!=='personel'||!Array.isArray(S.meals))return;
-          const allowed=allowedForToday();
-          S.meals=S.meals.filter(m=>m.group_no!==1||allowed.includes(CAT[m.name]));
-        }
-        const oldRenderPerson=renderPerson;
-        renderPerson=function(){
-          applyRule();
-          oldRenderPerson();
-          try{
-            const allowed=allowedForToday();
-            if(allowed.length<4){
-              const txt=allowed.map(x=>LABEL[x]).join(' + ');
-              document.getElementById('datebar').innerHTML+=' &nbsp; • &nbsp; <b>Bugünün ana yemek kategorisi:</b> '+txt;
-            }
-          }catch(e){}
-        };
-        applyRule();
-        if(typeof S!=='undefined'&&S.user&&S.user.role==='personel')renderPerson();
-      })();
-    `;
+    ruleScript.textContent=`(function(){const CAT={'Bamya':'sebze','Bezelye':'sebze','Ispanak':'sebze','Mücver':'sebze','Kuru Fasulye':'sebze','Patates Kızartma':'sebze','Mantar':'sebze','Yaprak Sarma':'sebze','Tavuk Göveç':'tavuk','Tavuk Güveç':'tavuk','Tavuk Piloto':'tavuk','Tavuk Pilato':'tavuk','Tavuk Filato':'tavuk','Güveç':'et','Çökertme':'et','Rosto':'et','Kaşarlı Köfte':'kiyma','Izgara Köfte':'kiyma','Musakka':'kiyma','Karnıyarık':'kiyma','Kadın Budu':'kiyma'};const LABEL={sebze:'Sebze',kiyma:'Kıyma',tavuk:'Tavuk',et:'Et'};function allowedForToday(){const date=(typeof S!=='undefined'&&S.today)?new Date(S.today+'T12:00:00'):new Date();const day=date.getDay();if(day===1||day===4)return ['sebze'];if(day===2||day===5)return ['kiyma','tavuk'];if(day===3)return ['et'];return ['sebze','kiyma','tavuk','et']}function applyRule(){if(typeof S==='undefined'||!S.user||S.user.role!=='personel'||!Array.isArray(S.meals))return;const allowed=allowedForToday();S.meals=S.meals.filter(m=>m.group_no!==1||allowed.includes(CAT[m.name]))}const oldRenderPerson=renderPerson;renderPerson=function(){applyRule();oldRenderPerson();try{const allowed=allowedForToday();if(allowed.length<4){const txt=allowed.map(x=>LABEL[x]).join(' + ');document.getElementById('datebar').innerHTML+=' &nbsp; • &nbsp; <b>Bugünün ana yemek kategorisi:</b> '+txt}}catch(e){}};applyRule();if(typeof S!=='undefined'&&S.user&&S.user.role==='personel')renderPerson()})();`;
     d.body.appendChild(ruleScript);
 
     const portionScript=d.createElement('script');
     portionScript.textContent=`
       (function(){
         const PORTION_API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-portion-api';
-        const PLABEL={az:'Az',normal:'Normal',cok:'Çok'};
+        const PLABEL={az:'Az',normal:'Normal'};
         let portionChoice='normal';
-
-        async function portionApi(action,p={}){
-          const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});
-          const x=await r.json().catch(()=>({error:'Porsiyon bilgisi alınamadı'}));
-          if(!r.ok)throw Error(x.error||'Porsiyon işlemi başarısız');
-          return x;
-        }
-
-        function closePortionModal(){
-          const el=document.getElementById('portionModal');
-          if(el)el.remove();
-        }
-
-        window.choosePortion=function(v){
-          if(!['az','normal','cok'].includes(v))return;
-          portionChoice=v;
-          closePortionModal();
-        };
-
-        function askPortion(mealName){
-          closePortionModal();
-          const bg=document.createElement('div');
-          bg.id='portionModal';
-          bg.className='portionmodalbg';
-          bg.innerHTML='<div class="portionmodal"><h2>🍽️ Porsiyon Tercihi</h2><p><b>'+esc(mealName||'Ana yemek')+'</b> için porsiyonunuz nasıl olsun?</p><div class="portionchoices">'+
-            ['az','normal','cok'].map(v=>'<button type="button" class="portionchoice '+(portionChoice===v?'on':'')+'" onclick="choosePortion(\\''+v+'\\')">'+PLABEL[v]+'</button>').join('')+
-            '</div></div>';
-          document.body.appendChild(bg);
-        }
-
-        const oldSelectMeal=selectMeal;
-        selectMeal=function(g,id){
-          oldSelectMeal(g,id);
-          if(Number(g)===1){
-            const meal=(S.meals||[]).find(m=>m.id===id);
-            askPortion(meal?.name||'Ana yemek');
-          }
-        };
-
-        const oldApi=api;
-        api=async function(action,p={}){
-          const result=await oldApi(action,p);
-          if(action==='save_selection'){
-            await portionApi('save',{portion_size:portionChoice});
-          }
-          return result;
-        };
-
-        function drawAdminPortions(){
-          if(typeof S==='undefined'||!S.user||S.user.role!=='admin')return;
-          const ov=document.getElementById('ov');
-          if(!ov)return;
-          const old=document.getElementById('portionAdminPanel');if(old)old.remove();
-          const rows=S.today_portions||[];
-          const users=Object.fromEntries((S.users||[]).map(u=>[u.id,u.full_name]));
-          const counts={az:0,normal:0,cok:0};rows.forEach(x=>{if(counts[x.portion_size]!==undefined)counts[x.portion_size]++});
-          const panel=document.createElement('div');panel.id='portionAdminPanel';panel.className='panel';
-          panel.innerHTML='<h3>🍽️ Bugünkü Porsiyon Tercihleri</h3><div class="row" style="margin-bottom:10px"><span class="portiontag">Az: '+counts.az+'</span><span class="portiontag">Normal: '+counts.normal+'</span><span class="portiontag">Çok: '+counts.cok+'</span></div>'+
-            (rows.length?'<table><thead><tr><th>Personel</th><th>Porsiyon</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(users[x.user_id]||'Personel')+'</td><td><b>'+PLABEL[x.portion_size]+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz porsiyon tercihi yok.</div>');
-          ov.appendChild(panel);
-        }
-
-        const previousRenderAdmin=renderAdmin;
-        renderAdmin=function(){previousRenderAdmin();drawAdminPortions();};
-
-        async function initPortion(){
-          if(typeof S==='undefined'||!S.user)return false;
-          try{
-            const q=await portionApi('bootstrap');
-            portionChoice=q.portion_size||'normal';
-            S.today_portions=q.today_portions||[];
-            if(S.user.role==='admin')drawAdminPortions();
-          }catch(e){console.error('Porsiyon:',e)}
-          return true;
-        }
+        async function portionApi(action,p={}){const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});const x=await r.json().catch(()=>({error:'Porsiyon bilgisi alınamadı'}));if(!r.ok)throw Error(x.error||'Porsiyon işlemi başarısız');return x}
+        function closePortionModal(){const el=document.getElementById('portionModal');if(el)el.remove()}
+        window.choosePortion=function(v){if(!['az','normal'].includes(v))return;portionChoice=v;closePortionModal()};
+        function askPortion(mealName){closePortionModal();const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';bg.innerHTML='<div class="portionmodal"><h2>🍽️ Porsiyon Tercihi</h2><p><b>'+esc(mealName||'Ana yemek')+'</b> için porsiyonunuz nasıl olsun?</p><div class="portionchoices">'+['az','normal'].map(v=>'<button type="button" class="portionchoice '+(portionChoice===v?'on':'')+'" onclick="choosePortion(\\''+v+'\\')">'+PLABEL[v]+'</button>').join('')+'</div></div>';document.body.appendChild(bg)}
+        d.addEventListener('click',function(ev){const meal=ev.target.closest&&ev.target.closest('.meal');if(!meal)return;const group=meal.closest('.group');if(!group||String(group.getAttribute('data-g'))!=='1')return;setTimeout(()=>{let name='Ana yemek';try{const cap=meal.querySelector('.cap');if(cap)name=(cap.textContent||'').trim()||name}catch(e){}askPortion(name)},0)},true);
+        const oldApi=api;api=async function(action,p={}){const result=await oldApi(action,p);if(action==='save_selection'){await portionApi('save',{portion_size:portionChoice})}return result};
+        function drawAdminPortions(){if(typeof S==='undefined'||!S.user||S.user.role!=='admin')return;const ov=document.getElementById('ov');if(!ov)return;const old=document.getElementById('portionAdminPanel');if(old)old.remove();const rows=S.today_portions||[];const users=Object.fromEntries((S.users||[]).map(u=>[u.id,u.full_name]));const counts={az:0,normal:0};rows.forEach(x=>{if(counts[x.portion_size]!==undefined)counts[x.portion_size]++});const panel=document.createElement('div');panel.id='portionAdminPanel';panel.className='panel';panel.innerHTML='<h3>🍽️ Bugünkü Porsiyon Tercihleri</h3><div class="row" style="margin-bottom:10px"><span class="portiontag">Az: '+counts.az+'</span><span class="portiontag">Normal: '+counts.normal+'</span></div>'+(rows.length?'<table><thead><tr><th>Personel</th><th>Porsiyon</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(users[x.user_id]||'Personel')+'</td><td><b>'+(PLABEL[x.portion_size]||'Normal')+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz porsiyon tercihi yok.</div>');ov.appendChild(panel)}
+        const previousRenderAdmin=renderAdmin;renderAdmin=function(){previousRenderAdmin();drawAdminPortions()};
+        async function initPortion(){if(typeof S==='undefined'||!S.user)return false;try{const q=await portionApi('bootstrap');portionChoice=q.portion_size==='az'?'az':'normal';S.today_portions=q.today_portions||[];if(S.user.role==='admin')drawAdminPortions()}catch(e){console.error('Porsiyon:',e)}return true}
         let tries=0;const timer=setInterval(async()=>{tries++;if(await initPortion()||tries>30)clearInterval(timer)},100);
       })();
     `;
     d.body.appendChild(portionScript);
   }catch(e){console.error(e)}
 });
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.error('Service worker:',err));
-  });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.error('Service worker:',err))})}
 </script>
 </body>
 </html>
