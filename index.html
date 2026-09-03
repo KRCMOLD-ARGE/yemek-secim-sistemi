@@ -62,7 +62,7 @@ frame.addEventListener('load',()=>{
         padding-left:0!important;
         padding-right:0!important;
       }
-      .portionbox{background:#102846;border:1px solid #2a4d70;border-radius:12px;padding:13px;margin-bottom:12px;text-align:center}
+      .portionbox{background:#102846;border:1px solid #2a4d70;border-radius:12px;padding:13px;margin-top:12px;text-align:center}
       .portiontitle{font-weight:800;margin-bottom:9px}
       .portionopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
       .portionbtn{border:1px solid #416588;background:#163657;color:#eef5ff;border-radius:9px;padding:10px 8px;font-weight:800;cursor:pointer}
@@ -137,10 +137,10 @@ frame.addEventListener('load',()=>{
 
         function drawPortion(){
           if(typeof S==='undefined'||!S.user||S.user.role!=='personel')return;
-          const savebar=document.querySelector('.savebar');
-          if(!savebar)return;
+          const guestHead=document.querySelector('.guesthead');
+          if(!guestHead)return;
           let box=document.getElementById('portionBox');
-          if(!box){box=document.createElement('div');box.id='portionBox';box.className='portionbox';savebar.prepend(box);}
+          if(!box){box=document.createElement('div');box.id='portionBox';box.className='portionbox';guestHead.appendChild(box);}
           box.innerHTML='<div class="portiontitle">🍽️ Porsiyon Tercihi</div><div class="portionopts">'+
             ['az','normal','cok'].map(v=>'<button type="button" class="portionbtn '+(portionChoice===v?'on':'')+'" onclick="setPortionChoice(\\''+v+'\\')">'+PLABEL[v]+'</button>').join('')+
             '</div><div class="portionhint">Yemeğinizi az, normal veya çok porsiyon olarak seçebilirsiniz.</div>';
