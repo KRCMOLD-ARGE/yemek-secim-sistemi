@@ -35,6 +35,7 @@ frame.addEventListener('load',()=>{
       .portionmodal .portionchoices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
       .portionmodal .portionchoice{border:1px solid #ccd5e0;background:#f7f9fc;color:#172033;border-radius:10px;padding:14px 8px;font-weight:800;cursor:pointer}
       .portionmodal .portionchoice.on{background:#2869dc;color:#fff;border-color:#2869dc}
+      .g4{background:#8b5cf6}.group[data-g="4"] .meal.sel{outline-color:#a78bfa}.group[data-g="4"] .meal.sel .radio{border-color:#a78bfa}
       @media(max-width:900px){.person::before{background-size:235px 96px;background-position:center 12px;opacity:.20}.person .main{width:calc(100% - 24px)!important}}
     `;
     d.head.appendChild(s);
@@ -50,89 +51,43 @@ frame.addEventListener('load',()=>{
         const PLABEL={az:'Az',normal:'Normal'};
         const GLABEL={1:'1. Grup',2:'2. Grup',3:'3. Grup'};
         let portionChoices={1:'normal',2:'normal',3:'normal'};
-
-        async function portionApi(action,p={}){
-          const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});
-          const x=await r.json().catch(()=>({error:'Porsiyon bilgisi alınamadı'}));
-          if(!r.ok)throw Error(x.error||'Porsiyon işlemi başarısız');
-          return x;
-        }
-
-        function askPortion(groupNo,mealName){
-          const old=document.getElementById('portionModal');if(old)old.remove();
-          const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';
-          const box=document.createElement('div');box.className='portionmodal';
-          const h=document.createElement('h2');h.textContent='🍽️ Porsiyon Tercihi';
-          const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||GLABEL[groupNo])+'</b> için porsiyonunuz nasıl olsun?';
-          const choices=document.createElement('div');choices.className='portionchoices';
-          ['az','normal'].forEach(v=>{
-            const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoices[groupNo]===v?' on':'');b.textContent=PLABEL[v];
-            b.addEventListener('click',()=>{portionChoices[groupNo]=v;bg.remove()});choices.appendChild(b);
-          });
-          box.append(h,p,choices);bg.appendChild(box);document.body.appendChild(bg);
-        }
-
-        const originalPick=pick;
-        pick=function(g,id){
-          originalPick(g,id);
-          const groupNo=Number(g);
-          if([1,2,3].includes(groupNo)){
-            const m=(S.meals||[]).find(x=>x.id===id);
-            setTimeout(()=>askPortion(groupNo,m?.name||GLABEL[groupNo]),0);
-          }
-        };
-
-        const oldApi=api;
-        api=async function(action,p={}){
-          const result=await oldApi(action,p);
-          if(action==='save_selection'){
-            await portionApi('save',{group_no:1,portion_size:portionChoices[1]});
-            await portionApi('save',{group_no:2,portion_size:portionChoices[2]});
-            await portionApi('save',{group_no:3,portion_size:portionChoices[3]});
-          }
-          return result;
-        };
-
-        function drawAdminPortions(){
-          if(typeof S==='undefined'||!S.user||S.user.role!=='admin')return;
-          const ov=document.getElementById('ov');if(!ov)return;
-          const old=document.getElementById('portionAdminPanel');if(old)old.remove();
-          const rows=S.today_portions||[];
-          const ppl=(S.users||[]).filter(u=>u.role==='personel');
-          const panels=[...ov.querySelectorAll('.panel')];
-          const statusPanel=panels.find(x=>x.querySelector('h2')?.textContent?.includes('Personel Seçim Durumu'));
-          const table=statusPanel?.querySelector('table');
-          if(!table)return;
-          const trs=[...table.querySelectorAll('tr')].slice(1);
-          trs.forEach((tr,i)=>{
-            const u=ppl[i];if(!u)return;
-            const pr=rows.find(x=>x.user_id===u.id);
-            const tds=tr.querySelectorAll('td');
-            [1,2,3].forEach(g=>{
-              const td=tds[4+g];if(!td)return;
-              td.querySelectorAll('.portionmini').forEach(n=>n.remove());
-              if(!pr)return;
-              const val=g===1?pr.portion_size:(g===2?pr.portion_size_group2:pr.portion_size_group3);
-              const mini=document.createElement('div');mini.className='portionmini';mini.textContent=val==='az'?'Az':'Normal';td.appendChild(mini);
-            });
-          });
-        }
-
+        async function portionApi(action,p={}){const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});const x=await r.json().catch(()=>({error:'Porsiyon bilgisi alınamadı'}));if(!r.ok)throw Error(x.error||'Porsiyon işlemi başarısız');return x}
+        function askPortion(groupNo,mealName){const old=document.getElementById('portionModal');if(old)old.remove();const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';const box=document.createElement('div');box.className='portionmodal';const h=document.createElement('h2');h.textContent='🍽️ Porsiyon Tercihi';const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||GLABEL[groupNo])+'</b> için porsiyonunuz nasıl olsun?';const choices=document.createElement('div');choices.className='portionchoices';['az','normal'].forEach(v=>{const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoices[groupNo]===v?' on':'');b.textContent=PLABEL[v];b.addEventListener('click',()=>{portionChoices[groupNo]=v;bg.remove()});choices.appendChild(b)});box.append(h,p,choices);bg.appendChild(box);document.body.appendChild(bg)}
+        const originalPick=pick;pick=function(g,id){originalPick(g,id);const groupNo=Number(g);if([1,2,3].includes(groupNo)){const m=(S.meals||[]).find(x=>x.id===id);setTimeout(()=>askPortion(groupNo,m?.name||GLABEL[groupNo]),0)}};
+        const oldApi=api;api=async function(action,p={}){const result=await oldApi(action,p);if(action==='save_selection'){await portionApi('save',{group_no:1,portion_size:portionChoices[1]});await portionApi('save',{group_no:2,portion_size:portionChoices[2]});await portionApi('save',{group_no:3,portion_size:portionChoices[3]})}return result};
+        function drawAdminPortions(){if(typeof S==='undefined'||!S.user||S.user.role!=='admin')return;const ov=document.getElementById('ov');if(!ov)return;const rows=S.today_portions||[];const ppl=(S.users||[]).filter(u=>u.role==='personel');const panels=[...ov.querySelectorAll('.panel')];const statusPanel=panels.find(x=>x.querySelector('h2')?.textContent?.includes('Personel Seçim Durumu'));const table=statusPanel?.querySelector('table');if(!table)return;const trs=[...table.querySelectorAll('tr')].slice(1);trs.forEach((tr,i)=>{const u=ppl[i];if(!u)return;const pr=rows.find(x=>x.user_id===u.id);const tds=tr.querySelectorAll('td');[1,2,3].forEach(g=>{const td=tds[4+g];if(!td)return;td.querySelectorAll('.portionmini').forEach(n=>n.remove());if(!pr)return;const val=g===1?pr.portion_size:(g===2?pr.portion_size_group2:pr.portion_size_group3);const mini=document.createElement('div');mini.className='portionmini';mini.textContent=val==='az'?'Az':'Normal';td.appendChild(mini)})})}
         const previousRenderAdmin=renderAdmin;renderAdmin=function(){previousRenderAdmin();drawAdminPortions()};
-        async function initPortion(){
-          if(typeof S==='undefined'||!S.user)return false;
-          try{
-            const q=await portionApi('bootstrap');
-            portionChoices={1:q.portions?.[1]==='az'?'az':'normal',2:q.portions?.[2]==='az'?'az':'normal',3:q.portions?.[3]==='az'?'az':'normal'};
-            S.today_portions=q.today_portions||[];
-            if(S.user.role==='admin')drawAdminPortions();
-          }catch(e){console.error('Porsiyon:',e)}
-          return true;
-        }
+        async function initPortion(){if(typeof S==='undefined'||!S.user)return false;try{const q=await portionApi('bootstrap');portionChoices={1:q.portions?.[1]==='az'?'az':'normal',2:q.portions?.[2]==='az'?'az':'normal',3:q.portions?.[3]==='az'?'az':'normal'};S.today_portions=q.today_portions||[];if(S.user.role==='admin')drawAdminPortions()}catch(e){console.error('Porsiyon:',e)}return true}
         let tries=0;const timer=setInterval(async()=>{tries++;if(await initPortion()||tries>30)clearInterval(timer)},100);
       })();
     `;
     d.body.appendChild(portionScript);
+
+    const group4Script=d.createElement('script');
+    group4Script.textContent=`
+      (function(){
+        const G4API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-group4-api';
+        let guest4Map={},today4=[],todayGuest4=[];
+        async function g4api(action,p={}){const r=await fetch(G4API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});const x=await r.json().catch(()=>({error:'4. grup bilgisi alınamadı'}));if(!r.ok)throw Error(x.error||'4. grup işlemi başarısız');return x}
+        function cards4(selected,onClick){return (S.meals||[]).filter(m=>m.group_no===4).map(m=>'<div class="meal '+(selected===m.id?'sel':'')+'" onclick="'+onClick+'(\\''+m.id+'\\')">'+img(m)+'<div class="cap"><span class="radio"></span><b>'+esc(m.name)+'</b></div></div>').join('')}
+        window.pick4=function(id){P[4]=id;drawPerson4()};
+        window.pickGuest4=function(id){G[4]=id;document.getElementById('guestGroups').innerHTML=guestCards()};
+        function drawPerson4(){if(!S.user||S.user.role!=='personel')return;const groups=document.getElementById('groups');if(!groups)return;let el=document.getElementById('group4Block');if(!el){el=document.createElement('div');el.id='group4Block';groups.appendChild(el)}el.className='group';el.setAttribute('data-g','4');el.innerHTML='<h3><span class="badge g4">4. GRUP</span><span>Tatlı / Meyve</span></h3><div class="grid">'+cards4(P[4],'pick4')+'</div>'}
+        const rp=renderPerson;renderPerson=function(){rp();drawPerson4()};
+        const baseGuestCards=guestCards;guestCards=function(){return baseGuestCards()+'<div class="group" data-g="4"><h3><span class="badge g4">4. GRUP</span><span>Tatlı / Meyve</span></h3><div class="grid">'+cards4(G[4],'pickGuest4')+'</div></div>'};
+        const baseOpenGuest=openGuest;openGuest=function(id=null){baseOpenGuest(id);const x=id?(S.ownGuests||[]).find(a=>a.id===id):null;let v=x?guest4Map[x.id]||null:null;if(!v&&x){const oldMeal=(S.meals||[]).find(m=>m.id===x.group3_meal_id);if(oldMeal?.group_no===4){v=x.group3_meal_id;G[3]=null}}G[4]=v;document.getElementById('guestGroups').innerHTML=guestCards()};
+        copyGuestFromMe=function(){if(!P[1]||!P[2]||!P[3]||!P[4])return alert('Önce kendi yemeğinizi 4 gruptan da seçin.');G[1]=P[1];G[2]=P[2];G[3]=P[3];G[4]=P[4];document.getElementById('guestGroups').innerHTML=guestCards()};
+        const baseRenderGuests=renderGuests;renderGuests=function(){baseRenderGuests();const items=[...document.querySelectorAll('#guestList .guestitem')];(S.ownGuests||[]).forEach((g,i)=>{const meal4=mealName(guest4Map[g.id]);if(!meal4||!items[i])return;const chips=items[i].querySelector('.guestchips');if(chips&&!chips.textContent.includes(meal4)){const c=document.createElement('span');c.className='chip';c.textContent=meal4;chips.appendChild(c)}})};
+        const api3=api;api=async function(action,p={}){const result=await api3(action,p);if(action==='save_selection'){if(!P[4])throw Error('4. gruptan bir seçim yapın.');await g4api('save',{group4_meal_id:P[4]})}if(action==='add_guest'||action==='update_guest'){if(!G[4])throw Error('Misafir için 4. gruptan bir seçim yapın.');const gid=result?.guest?.id||p.id;if(gid)await g4api('save_guest',{guest_id:gid,group4_meal_id:G[4]})}return result};
+        saveSel=async function(){if(saving)return;if(!P[1]||!P[2]||!P[3]||!P[4])return message('pm','Lütfen 1., 2., 3. ve 4. gruptan birer yemek seçin.',true);const b=document.getElementById('saveBtn');saving=true;b.disabled=true;b.textContent='⏳ Kaydediliyor...';try{const x=await api('save_selection',{group1_meal_id:P[1],group2_meal_id:P[2],group3_meal_id:P[3]});if(!x?.ok)throw Error('Kayıt doğrulanamadı.');S.ownSelection=x.selection;b.textContent='✓ Seçim Kaydedildi';showSuccess();setTimeout(()=>{b.textContent='💾 Seçimi Güncelle';b.disabled=false;saving=false},700)}catch(e){message('pm','Kayıt sırasında hata: '+e.message,true);b.textContent='💾 Tekrar Dene';b.disabled=false;saving=false}};
+        saveGuest=async function(){G.name=document.getElementById('guestName').value.trim();if(!G[1]||!G[2]||!G[3]||!G[4])return alert('Misafir için 4 gruptan da birer yemek seçin.');let b=document.getElementById('guestSaveBtn');b.disabled=true;b.textContent='Kaydediliyor...';try{let x=await api(G.id?'update_guest':'add_guest',{id:G.id,guest_name:G.name,group1_meal_id:G[1],group2_meal_id:G[2],group3_meal_id:G[3]});if(!x?.ok)throw Error('Kayıt doğrulanamadı.');closeGuest();await boot();showSuccess('Misafir kaydedildi','Misafir yemek seçimi başarıyla kaydedildi.<br><b>Afiyet olsun! 🍽️</b>')}catch(e){alert(e.message)}finally{b.disabled=false;b.textContent='Misafiri Kaydet'}};
+        function drawAdmin4(){if(!S.user||S.user.role!=='admin')return;const ov=document.getElementById('ov');if(!ov)return;document.getElementById('group4AdminPanel')?.remove();const counts={};[...today4,...todayGuest4].forEach(r=>{if(!r.group4_meal_id)return;const n=mealName(r.group4_meal_id)||'Bilinmeyen';counts[n]=(counts[n]||0)+1});const panel=document.createElement('div');panel.id='group4AdminPanel';panel.className='panel';panel.innerHTML='<h3>🍰 4. Grup — Tatlı / Meyve</h3>'+(Object.keys(counts).length?'<table><thead><tr><th>Ürün</th><th>Toplam</th></tr></thead><tbody>'+Object.entries(counts).map(([n,c])=>'<tr><td>'+esc(n)+'</td><td><b>'+c+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz 4. grup seçimi yok.</div>');ov.appendChild(panel)}
+        const ra=renderAdmin;renderAdmin=function(){ra();drawAdmin4()};
+        async function init4(){if(typeof S==='undefined'||!S.user)return false;try{const q=await g4api('bootstrap');P[4]=q.group4_meal_id||P[4]||null;if(!P[4]&&P[3]){const m=(S.meals||[]).find(x=>x.id===P[3]);if(m?.group_no===4){P[4]=P[3];P[3]=null}}guest4Map=Object.fromEntries((q.guest_group4||[]).map(x=>[x.id,x.group4_meal_id]));today4=q.today_group4||[];todayGuest4=q.today_guest_group4||[];if(S.user.role==='personel'){drawPerson4();renderGuests()}else drawAdmin4()}catch(e){console.error('4. grup:',e)}return true}
+        let tries4=0;const timer4=setInterval(async()=>{tries4++;if(await init4()||tries4>30)clearInterval(timer4)},100);
+      })();
+    `;
+    d.body.appendChild(group4Script);
   }catch(e){console.error(e)}
 });
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.error('Service worker:',err))})}
