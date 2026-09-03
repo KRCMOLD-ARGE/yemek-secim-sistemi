@@ -62,13 +62,14 @@ frame.addEventListener('load',()=>{
         padding-left:0!important;
         padding-right:0!important;
       }
-      .portionbox{background:#102846;border:1px solid #2a4d70;border-radius:12px;padding:13px;margin-top:12px;text-align:center}
-      .portiontitle{font-weight:800;margin-bottom:9px}
-      .portionopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-      .portionbtn{border:1px solid #416588;background:#163657;color:#eef5ff;border-radius:9px;padding:10px 8px;font-weight:800;cursor:pointer}
-      .portionbtn.on{background:#2869dc;border-color:#5d96f4;box-shadow:0 0 0 2px #2d78ff55}
-      .portionhint{font-size:12px;color:#b9cce0;margin-top:7px}
       .portiontag{display:inline-block;border-radius:999px;padding:4px 8px;font-weight:700;font-size:12px;background:#eef3f8;color:#334155}
+      .portionmodalbg{position:fixed;inset:0;background:#07111dcc;display:grid;place-items:center;padding:18px;z-index:10050}
+      .portionmodal{width:min(420px,94vw);background:#fff;color:#172033;border-radius:18px;padding:24px;box-shadow:0 24px 80px #0007;text-align:center}
+      .portionmodal h2{margin:0 0 8px;font-size:23px}
+      .portionmodal p{margin:0 0 18px;color:#617083;line-height:1.45}
+      .portionmodal .portionchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+      .portionmodal .portionchoice{border:1px solid #ccd5e0;background:#f7f9fc;color:#172033;border-radius:10px;padding:13px 8px;font-weight:800;cursor:pointer}
+      .portionmodal .portionchoice.on{background:#2869dc;color:#fff;border-color:#2869dc}
       @media(max-width:900px){
         .person::before{
           background-size:235px 96px;
@@ -135,21 +136,36 @@ frame.addEventListener('load',()=>{
           return x;
         }
 
-        function drawPortion(){
-          if(typeof S==='undefined'||!S.user||S.user.role!=='personel')return;
-          const guestHead=document.querySelector('.guesthead');
-          if(!guestHead)return;
-          let box=document.getElementById('portionBox');
-          if(!box){box=document.createElement('div');box.id='portionBox';box.className='portionbox';guestHead.appendChild(box);}
-          box.innerHTML='<div class="portiontitle">🍽️ Porsiyon Tercihi</div><div class="portionopts">'+
-            ['az','normal','cok'].map(v=>'<button type="button" class="portionbtn '+(portionChoice===v?'on':'')+'" onclick="setPortionChoice(\\''+v+'\\')">'+PLABEL[v]+'</button>').join('')+
-            '</div><div class="portionhint">Yemeğinizi az, normal veya çok porsiyon olarak seçebilirsiniz.</div>';
+        function closePortionModal(){
+          const el=document.getElementById('portionModal');
+          if(el)el.remove();
         }
 
-        window.setPortionChoice=function(v){if(!['az','normal','cok'].includes(v))return;portionChoice=v;drawPortion();};
+        window.choosePortion=function(v){
+          if(!['az','normal','cok'].includes(v))return;
+          portionChoice=v;
+          closePortionModal();
+        };
 
-        const previousRenderPerson=renderPerson;
-        renderPerson=function(){previousRenderPerson();drawPortion();};
+        function askPortion(mealName){
+          closePortionModal();
+          const bg=document.createElement('div');
+          bg.id='portionModal';
+          bg.className='portionmodalbg';
+          bg.innerHTML='<div class="portionmodal"><h2>🍽️ Porsiyon Tercihi</h2><p><b>'+esc(mealName||'Ana yemek')+'</b> için porsiyonunuz nasıl olsun?</p><div class="portionchoices">'+
+            ['az','normal','cok'].map(v=>'<button type="button" class="portionchoice '+(portionChoice===v?'on':'')+'" onclick="choosePortion(\\''+v+'\\')">'+PLABEL[v]+'</button>').join('')+
+            '</div></div>';
+          document.body.appendChild(bg);
+        }
+
+        const oldSelectMeal=selectMeal;
+        selectMeal=function(g,id){
+          oldSelectMeal(g,id);
+          if(Number(g)===1){
+            const meal=(S.meals||[]).find(m=>m.id===id);
+            askPortion(meal?.name||'Ana yemek');
+          }
+        };
 
         const oldApi=api;
         api=async function(action,p={}){
@@ -183,7 +199,7 @@ frame.addEventListener('load',()=>{
             const q=await portionApi('bootstrap');
             portionChoice=q.portion_size||'normal';
             S.today_portions=q.today_portions||[];
-            if(S.user.role==='personel')drawPortion();else drawAdminPortions();
+            if(S.user.role==='admin')drawAdminPortions();
           }catch(e){console.error('Porsiyon:',e)}
           return true;
         }
