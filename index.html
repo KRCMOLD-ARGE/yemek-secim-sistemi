@@ -44,13 +44,23 @@ frame.addEventListener('load',()=>{
         z-index:0;
         background:linear-gradient(180deg,rgba(6,20,39,.30),rgba(6,20,39,.42));
       }
-      .person .main{position:relative!important;z-index:1!important;}
+      .person .main{
+        position:relative!important;
+        z-index:1!important;
+        width:calc(100% - 48px)!important;
+        max-width:1400px!important;
+        margin-left:auto!important;
+        margin-right:auto!important;
+        padding-left:0!important;
+        padding-right:0!important;
+      }
       @media(max-width:900px){
         .person::before{
           background-size:235px 96px;
           background-position:10px 12px;
           opacity:.20;
         }
+        .person .main{width:calc(100% - 24px)!important;}
       }
     `;
     d.head.appendChild(s);
