@@ -28,6 +28,7 @@ frame.addEventListener('load',()=>{
       .person::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:linear-gradient(180deg,rgba(6,20,39,.30),rgba(6,20,39,.42))}
       .person .main{position:relative!important;z-index:1!important;width:calc(100% - 48px)!important;max-width:1400px!important;margin-left:auto!important;margin-right:auto!important;padding-left:0!important;padding-right:0!important}
       .portiontag{display:inline-block;border-radius:999px;padding:4px 8px;font-weight:700;font-size:12px;background:#eef3f8;color:#334155}
+      .portionmini{font-size:11px!important;color:#d7262f!important;font-weight:800!important;margin-top:3px;line-height:1.1}
       .portionmodalbg{position:fixed;inset:0;background:#07111dcc;display:grid;place-items:center;padding:18px;z-index:10050}
       .portionmodal{width:min(420px,94vw);background:#fff;color:#172033;border-radius:18px;padding:24px;box-shadow:0 24px 80px #0007;text-align:center}
       .portionmodal h2{margin:0 0 8px;font-size:23px}.portionmodal p{margin:0 0 18px;color:#617083;line-height:1.45}
@@ -97,10 +98,24 @@ frame.addEventListener('load',()=>{
           const ov=document.getElementById('ov');if(!ov)return;
           const old=document.getElementById('portionAdminPanel');if(old)old.remove();
           const rows=S.today_portions||[];
-          const users=Object.fromEntries((S.users||[]).map(u=>[u.id,u.full_name]));
-          const panel=document.createElement('div');panel.id='portionAdminPanel';panel.className='panel';
-          panel.innerHTML='<h3>🍽️ Bugünkü Porsiyon Tercihleri</h3>'+(rows.length?'<table><thead><tr><th>Personel</th><th>1. Grup</th><th>2. Grup</th><th>3. Grup</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(users[x.user_id]||'Personel')+'</td><td><b>'+(x.portion_size==='az'?'Az':'Normal')+'</b></td><td><b>'+(x.portion_size_group2==='az'?'Az':'Normal')+'</b></td><td><b>'+(x.portion_size_group3==='az'?'Az':'Normal')+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz porsiyon tercihi yok.</div>');
-          ov.appendChild(panel);
+          const ppl=(S.users||[]).filter(u=>u.role==='personel');
+          const panels=[...ov.querySelectorAll('.panel')];
+          const statusPanel=panels.find(x=>x.querySelector('h2')?.textContent?.includes('Personel Seçim Durumu'));
+          const table=statusPanel?.querySelector('table');
+          if(!table)return;
+          const trs=[...table.querySelectorAll('tr')].slice(1);
+          trs.forEach((tr,i)=>{
+            const u=ppl[i];if(!u)return;
+            const pr=rows.find(x=>x.user_id===u.id);
+            const tds=tr.querySelectorAll('td');
+            [1,2,3].forEach(g=>{
+              const td=tds[4+g];if(!td)return;
+              td.querySelectorAll('.portionmini').forEach(n=>n.remove());
+              if(!pr)return;
+              const val=g===1?pr.portion_size:(g===2?pr.portion_size_group2:pr.portion_size_group3);
+              const mini=document.createElement('div');mini.className='portionmini';mini.textContent=val==='az'?'Az':'Normal';td.appendChild(mini);
+            });
+          });
         }
 
         const previousRenderAdmin=renderAdmin;renderAdmin=function(){previousRenderAdmin();drawAdminPortions()};
