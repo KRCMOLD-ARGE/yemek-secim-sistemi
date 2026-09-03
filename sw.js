@@ -1,4 +1,4 @@
-const CACHE='kraw-yemek-v1';
+const CACHE='kraw-yemek-v2';
 const SHELL=['./','./index.html','./app.html','./manifest.webmanifest','./icon.svg','./kraw-wallpaper.png'];
 
 self.addEventListener('install',event=>{
