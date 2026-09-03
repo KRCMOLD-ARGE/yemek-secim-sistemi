@@ -47,7 +47,8 @@ frame.addEventListener('load',()=>{
       (function(){
         const PORTION_API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-portion-api';
         const PLABEL={az:'Az',normal:'Normal'};
-        let portionChoice='normal';
+        const GLABEL={1:'1. Grup',2:'2. Grup',3:'3. Grup'};
+        let portionChoices={1:'normal',2:'normal',3:'normal'};
 
         async function portionApi(action,p={}){
           const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});
@@ -56,16 +57,16 @@ frame.addEventListener('load',()=>{
           return x;
         }
 
-        function askPortion(mealName){
+        function askPortion(groupNo,mealName){
           const old=document.getElementById('portionModal');if(old)old.remove();
           const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';
           const box=document.createElement('div');box.className='portionmodal';
           const h=document.createElement('h2');h.textContent='🍽️ Porsiyon Tercihi';
-          const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||'Ana yemek')+'</b> için porsiyonunuz nasıl olsun?';
+          const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||GLABEL[groupNo])+'</b> için porsiyonunuz nasıl olsun?';
           const choices=document.createElement('div');choices.className='portionchoices';
           ['az','normal'].forEach(v=>{
-            const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoice===v?' on':'');b.textContent=PLABEL[v];
-            b.addEventListener('click',()=>{portionChoice=v;bg.remove()});choices.appendChild(b);
+            const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoices[groupNo]===v?' on':'');b.textContent=PLABEL[v];
+            b.addEventListener('click',()=>{portionChoices[groupNo]=v;bg.remove()});choices.appendChild(b);
           });
           box.append(h,p,choices);bg.appendChild(box);document.body.appendChild(bg);
         }
@@ -73,16 +74,21 @@ frame.addEventListener('load',()=>{
         const originalPick=pick;
         pick=function(g,id){
           originalPick(g,id);
-          if(Number(g)===1){
+          const groupNo=Number(g);
+          if([1,2,3].includes(groupNo)){
             const m=(S.meals||[]).find(x=>x.id===id);
-            setTimeout(()=>askPortion(m?.name||'Ana yemek'),0);
+            setTimeout(()=>askPortion(groupNo,m?.name||GLABEL[groupNo]),0);
           }
         };
 
         const oldApi=api;
         api=async function(action,p={}){
           const result=await oldApi(action,p);
-          if(action==='save_selection')await portionApi('save',{portion_size:portionChoice});
+          if(action==='save_selection'){
+            await portionApi('save',{group_no:1,portion_size:portionChoices[1]});
+            await portionApi('save',{group_no:2,portion_size:portionChoices[2]});
+            await portionApi('save',{group_no:3,portion_size:portionChoices[3]});
+          }
           return result;
         };
 
@@ -92,14 +98,22 @@ frame.addEventListener('load',()=>{
           const old=document.getElementById('portionAdminPanel');if(old)old.remove();
           const rows=S.today_portions||[];
           const users=Object.fromEntries((S.users||[]).map(u=>[u.id,u.full_name]));
-          const counts={az:0,normal:0};rows.forEach(x=>{(x.portion_size==='az'?counts.az++:counts.normal++)});
           const panel=document.createElement('div');panel.id='portionAdminPanel';panel.className='panel';
-          panel.innerHTML='<h3>🍽️ Bugünkü Porsiyon Tercihleri</h3><div class="row" style="margin-bottom:10px"><span class="portiontag">Az: '+counts.az+'</span><span class="portiontag">Normal: '+counts.normal+'</span></div>'+(rows.length?'<table><thead><tr><th>Personel</th><th>Porsiyon</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(users[x.user_id]||'Personel')+'</td><td><b>'+(x.portion_size==='az'?'Az':'Normal')+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz porsiyon tercihi yok.</div>');
+          panel.innerHTML='<h3>🍽️ Bugünkü Porsiyon Tercihleri</h3>'+(rows.length?'<table><thead><tr><th>Personel</th><th>1. Grup</th><th>2. Grup</th><th>3. Grup</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(users[x.user_id]||'Personel')+'</td><td><b>'+(x.portion_size==='az'?'Az':'Normal')+'</b></td><td><b>'+(x.portion_size_group2==='az'?'Az':'Normal')+'</b></td><td><b>'+(x.portion_size_group3==='az'?'Az':'Normal')+'</b></td></tr>').join('')+'</tbody></table>':'<div class="msg">Bugün henüz porsiyon tercihi yok.</div>');
           ov.appendChild(panel);
         }
 
         const previousRenderAdmin=renderAdmin;renderAdmin=function(){previousRenderAdmin();drawAdminPortions()};
-        async function initPortion(){if(typeof S==='undefined'||!S.user)return false;try{const q=await portionApi('bootstrap');portionChoice=q.portion_size==='az'?'az':'normal';S.today_portions=q.today_portions||[];if(S.user.role==='admin')drawAdminPortions()}catch(e){console.error('Porsiyon:',e)}return true}
+        async function initPortion(){
+          if(typeof S==='undefined'||!S.user)return false;
+          try{
+            const q=await portionApi('bootstrap');
+            portionChoices={1:q.portions?.[1]==='az'?'az':'normal',2:q.portions?.[2]==='az'?'az':'normal',3:q.portions?.[3]==='az'?'az':'normal'};
+            S.today_portions=q.today_portions||[];
+            if(S.user.role==='admin')drawAdminPortions();
+          }catch(e){console.error('Porsiyon:',e)}
+          return true;
+        }
         let tries=0;const timer=setInterval(async()=>{tries++;if(await initPortion()||tries>30)clearInterval(timer)},100);
       })();
     `;
