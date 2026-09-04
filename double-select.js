@@ -56,27 +56,36 @@
     const first=P?.[g]?String(P[g]):null;
     const second=window.D2?.[g]?String(window.D2[g]):null;
 
+    // İlk seçime tekrar basılırsa seçimi kaldır. İkinci seçim varsa onu ilk seçime taşı.
     if(first===id){
-      if(second){P[g]=second;window.D2[g]=null;renderAll()}
+      if(second){P[g]=second;window.D2[g]=null}
+      else{P[g]=null}
+      renderAll();
       return;
     }
-    if(second===id){window.D2[g]=null;renderAll();return}
 
+    // İkinci seçime tekrar basılırsa sadece ikinci seçimi kaldır.
+    if(second===id){
+      window.D2[g]=null;
+      renderAll();
+      return;
+    }
+
+    // Grupta seçim yoksa yeni ürünü ilk seçim yap.
     if(!first){
-      if(g===4&&typeof basePick4==='function')basePick4(id);
-      else if(typeof basePick==='function')basePick(g,id);
-      else {P[g]=id;renderAll()}
-      setTimeout(paint,30);
+      P[g]=id;
+      renderAll();
       return;
     }
 
+    // Sadece bir seçim varsa yeni ürünü ikinci seçim yap.
     if(!second){
       window.D2[g]=id;
       renderAll();
       return;
     }
 
-    alert(g+'. grupta en fazla 2 yemek seçebilirsiniz. Önce seçili yemeklerden birini kaldırın.');
+    alert(g+'. grupta en fazla 2 yemek seçebilirsiniz. Değiştirmek istediğiniz seçili yemeğe tekrar basarak önce kaldırın.');
   }
 
   function extractId(meal){
