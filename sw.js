@@ -1,4 +1,4 @@
-const CACHE='kraw-yemek-v14';
+const CACHE='kraw-yemek-v15';
 const SHELL=['./','./index.html','./app.html','./manifest.webmanifest','./icon.svg','./kraw-wallpaper.png'];
 
 function transformIndex(html){
@@ -12,89 +12,38 @@ function transformIndex(html){
     .replace("function askPortion(groupNo,mealName){const old=document.getElementById('portionModal');if(old)old.remove();const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';const box=document.createElement('div');box.className='portionmodal';const h=document.createElement('h2');h.textContent='🍽️ Porsiyon Tercihi';const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||GLABEL[groupNo])+'</b> için porsiyonunuz nasıl olsun?';const choices=document.createElement('div');choices.className='portionchoices';['az','normal'].forEach(v=>{const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoices[groupNo]===v?' on':'');b.textContent=PLABEL[v];b.addEventListener('click',()=>{portionChoices[groupNo]=v;bg.remove()});choices.appendChild(b)});box.append(h,p,choices);bg.appendChild(box);document.body.appendChild(bg)}", "function askPortion(groupNo,mealName){const old=document.getElementById('portionModal');if(old)old.remove();const anchor=document.querySelector('.group[data-g=\\\"'+groupNo+'\\\"] .meal.sel');const bg=document.createElement('div');bg.id='portionModal';bg.className='portionmodalbg';const box=document.createElement('div');box.className='portionmodal';const h=document.createElement('h2');h.textContent='Porsiyon';const p=document.createElement('p');p.innerHTML='<b>'+esc(mealName||GLABEL[groupNo])+'</b>Az mı, normal mi?';const choices=document.createElement('div');choices.className='portionchoices';['az','normal'].forEach(v=>{const b=document.createElement('button');b.type='button';b.className='portionchoice'+(portionChoices[groupNo]===v?' on':'');b.textContent=PLABEL[v];b.addEventListener('click',()=>{portionChoices[groupNo]=v;bg.remove()});choices.appendChild(b)});box.append(h,p,choices);bg.appendChild(box);document.body.appendChild(bg);requestAnimationFrame(()=>{if(!anchor)return;const r=anchor.getBoundingClientRect();const bw=bg.offsetWidth||230;const bh=bg.offsetHeight||96;let left=r.left+(r.width-bw)/2;let top=r.top+(r.height-bh)/2;left=Math.max(8,Math.min(left,window.innerWidth-bw-8));top=Math.max(8,Math.min(top,window.innerHeight-bh-8));bg.style.left=left+'px';bg.style.top=top+'px'})}")
     .replace('@media(max-width:900px){.person::before{background-size:235px 96px;background-position:center 12px;opacity:.20}.person .main{width:calc(100% - 24px)!important}}', '@media(max-width:900px){.person::before{background-size:235px 96px;background-position:center 12px;opacity:.20}.person .main{width:calc(100% - 24px)!important}.portionmodal{width:200px;padding:8px}.portionmodal .portionchoice{padding:8px 5px}}');
 
-  const summaryAddon=`<script>
+  const addon=`<script>
 (function(){
   const frame=document.getElementById('appFrame');
-  function installOrderSummary(){
+  function install(){
     try{
-      const d=frame.contentDocument;
-      if(!d||d.getElementById('ownOrderSummaryInstaller'))return;
-      const marker=d.createElement('div');marker.id='ownOrderSummaryInstaller';marker.style.display='none';d.body.appendChild(marker);
+      const d=frame.contentDocument;if(!d||d.getElementById('orderSummaryInstaller'))return;
+      const marker=d.createElement('div');marker.id='orderSummaryInstaller';marker.style.display='none';d.body.appendChild(marker);
       const st=d.createElement('style');
-      st.textContent='.ownorder{background:#102943;border:1px solid #2a4d70;border-radius:12px;padding:14px;margin-top:12px;color:#eef5ff}.ownorder h3{margin:0 0 5px;font-size:17px}.ownorder .owner{font-size:15px;font-weight:800;color:#fff;margin-bottom:10px}.ownorder .orow{display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #284765}.ownorder .onum{width:30px;height:30px;border-radius:8px;background:#183d64;display:grid;place-items:center;font-weight:900}.ownorder .omeal{font-weight:800}.ownorder .olabel{font-size:11px;color:#9fb3c8;margin-top:2px}.ownorder .done{display:inline-block;margin-top:8px;padding:5px 9px;border-radius:999px;background:#0b5b46;color:#d8fff0;font-size:12px;font-weight:800}';
+      st.textContent='.ownorder{background:#102943;border:1px solid #2a4d70;border-radius:12px;padding:14px;margin-top:12px;color:#eef5ff}.ownorder h3{margin:0 0 5px;font-size:17px}.ownorder .owner{font-size:15px;font-weight:800;color:#fff;margin-bottom:10px}.ownorder .orow{display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #284765}.ownorder .onum{width:30px;height:30px;border-radius:8px;background:#183d64;display:grid;place-items:center;font-weight:900}.ownorder .omeal{font-weight:800}.ownorder .olabel{font-size:11px;color:#9fb3c8;margin-top:2px}.ownorder .done{display:inline-block;margin-top:8px;padding:5px 9px;border-radius:999px;background:#0b5b46;color:#d8fff0;font-size:12px;font-weight:800}.orderdonebg{position:fixed;inset:0;background:#07111ddd;display:grid;place-items:center;padding:18px;z-index:12000}.orderdone{width:min(520px,94vw);background:#fff;color:#172033;border-radius:20px;padding:22px;box-shadow:0 24px 80px #0008}.orderdone h2{margin:0 0 5px}.orderdone .name{font-weight:900;font-size:18px;color:#2869dc;margin-bottom:14px}.orderdone .line{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #e5eaf0}.orderdone .num{width:30px;height:30px;border-radius:8px;background:#102943;color:#fff;display:grid;place-items:center;font-weight:900}.orderdone .mealname{font-weight:800}.orderdone .glabel{font-size:12px;color:#6b7787;margin-top:2px}.orderdone button{width:100%;margin-top:16px;border:0;border-radius:10px;padding:12px;background:#2869dc;color:#fff;font-weight:800;cursor:pointer}';
       d.head.appendChild(st);
       const sc=d.createElement('script');
       sc.textContent=`(function(){
-        function ownMealName(id){try{return (S.meals||[]).find(m=>m.id===id)?.name||''}catch(e){return ''}}
-        function drawOwnOrder(){
-          try{
-            if(typeof S==='undefined'||!S.user||S.user.role!=='personel')return;
-            const host=document.querySelector('.guestwrap');if(!host)return;
-            let card=document.getElementById('ownOrderCard');
-            const ready=!!(P&&P[1]&&P[2]&&P[3]&&P[4]);
-            if(!ready){if(card)card.remove();return}
-            if(!card){card=document.createElement('div');card.id='ownOrderCard';card.className='ownorder';const list=document.getElementById('guestList');host.insertBefore(card,list||null)}
-            const labels={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};
-            card.innerHTML='<h3>🍽️ Bugünkü Siparişim</h3><div class="owner">👤 '+esc(S.user.full_name)+'</div>'+[1,2,3,4].map(g=>'<div class="orow"><div class="onum">'+g+'</div><div><div class="omeal">'+esc(ownMealName(P[g]))+'</div><div class="olabel">'+labels[g]+'</div></div></div>').join('')+'<span class="done">✓ Seçimler tamamlandı</span>';
-          }catch(e){console.error('Sipariş özeti:',e)}
-        }
-        const _renderPerson=renderPerson;renderPerson=function(){_renderPerson();setTimeout(drawOwnOrder,30)};
-        const _pick=pick;pick=function(g,id){_pick(g,id);setTimeout(drawOwnOrder,30)};
-        if(typeof window.pick4==='function'){const _pick4=window.pick4;window.pick4=function(id){_pick4(id);setTimeout(drawOwnOrder,30)}}
-        if(typeof saveSel==='function'){const _saveSel=saveSel;saveSel=async function(){await _saveSel();setTimeout(drawOwnOrder,50)}}
-        let n=0;const t=setInterval(()=>{n++;drawOwnOrder();if(n>80)clearInterval(t)},250);
+        function mname(id){try{return (S.meals||[]).find(m=>m.id===id)?.name||''}catch(e){return ''}}
+        function ready(){return !!(P&&P[1]&&P[2]&&P[3]&&P[4])}
+        function drawCard(){try{if(typeof S==='undefined'||!S.user||S.user.role!=='personel')return;const host=document.querySelector('.guestwrap');if(!host)return;let card=document.getElementById('ownOrderCard');if(!ready()){if(card)card.remove();return}if(!card){card=document.createElement('div');card.id='ownOrderCard';card.className='ownorder';const list=document.getElementById('guestList');host.insertBefore(card,list||null)}const labels={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};card.innerHTML='<h3>🍽️ Bugünkü Siparişim</h3><div class="owner">👤 '+esc(S.user.full_name)+'</div>'+[1,2,3,4].map(g=>'<div class="orow"><div class="onum">'+g+'</div><div><div class="omeal">'+esc(mname(P[g]))+'</div><div class="olabel">'+labels[g]+'</div></div></div>').join('')+'<span class="done">✓ Seçimler tamamlandı</span>'}catch(e){console.error(e)}}
+        function showCompleted(){try{if(!ready())return;document.getElementById('orderDoneModal')?.remove();const bg=document.createElement('div');bg.id='orderDoneModal';bg.className='orderdonebg';const box=document.createElement('div');box.className='orderdone';const labels={1:'1. Grup • Ana Yemek',2:'2. Grup • Yan Yemek',3:'3. Grup • Yoğurt / Cacık / Salata',4:'4. Grup • Tatlı / Meyve'};box.innerHTML='<h2>✅ Siparişiniz Tamamlandı</h2><div class="name">👤 '+esc(S.user.full_name)+'</div>'+[1,2,3,4].map(g=>'<div class="line"><div class="num">'+g+'</div><div><div class="mealname">'+esc(mname(P[g]))+'</div><div class="glabel">'+labels[g]+'</div></div></div>').join('')+'<button type="button">Tamam</button>';box.querySelector('button').onclick=()=>bg.remove();bg.appendChild(box);document.body.appendChild(bg)}catch(e){console.error(e)}}
+        const rp=renderPerson;renderPerson=function(){rp();setTimeout(drawCard,30)};
+        const pk=pick;pick=function(g,id){pk(g,id);setTimeout(drawCard,30)};
+        if(typeof window.pick4==='function'){const p4=window.pick4;window.pick4=function(id){p4(id);setTimeout(drawCard,30)}}
+        if(typeof saveSel==='function'){const ss=saveSel;saveSel=async function(){await ss();setTimeout(()=>{drawCard();if(typeof S!=='undefined'&&S.ownSelection)showCompleted()},250)}}
+        let n=0;const t=setInterval(()=>{n++;drawCard();if(n>80)clearInterval(t)},250);
       })();`;
       d.body.appendChild(sc);
     }catch(e){console.error(e)}
   }
-  frame.addEventListener('load',()=>setTimeout(installOrderSummary,50));
-  setTimeout(installOrderSummary,300);
+  frame.addEventListener('load',()=>setTimeout(install,50));setTimeout(install,300);
 })();
 <\/script>`;
-  out=out.replace('</body>',summaryAddon+'</body>');
+  out=out.replace('</body>',addon+'</body>');
   return out;
 }
 
-self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-
-self.addEventListener('fetch',event=>{
-  const req=event.request;
-  const url=new URL(req.url);
-  if(req.method!=='GET')return;
-  if(url.hostname.includes('supabase.co'))return;
-
-  if(req.mode==='navigate'){
-    event.respondWith(
-      fetch(req).then(async res=>{
-        const text=await res.text();
-        const transformed=transformIndex(text);
-        const out=new Response(transformed,{status:res.status,statusText:res.statusText,headers:res.headers});
-        const copy=out.clone();
-        caches.open(CACHE).then(cache=>cache.put('./index.html',copy));
-        return out;
-      }).catch(()=>caches.match('./index.html'))
-    );
-    return;
-  }
-
-  event.respondWith(
-    caches.match(req).then(cached=>{
-      const network=fetch(req).then(res=>{
-        if(res&&res.ok){
-          const copy=res.clone();
-          caches.open(CACHE).then(cache=>cache.put(req,copy));
-        }
-        return res;
-      }).catch(()=>cached);
-      return cached||network;
-    })
-  );
-});
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',event=>{const req=event.request;const url=new URL(req.url);if(req.method!=='GET')return;if(url.hostname.includes('supabase.co'))return;if(req.mode==='navigate'){event.respondWith(fetch(req).then(async res=>{const text=await res.text();const transformed=transformIndex(text);const out=new Response(transformed,{status:res.status,statusText:res.statusText,headers:res.headers});const copy=out.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy));return out;}).catch(()=>caches.match('./index.html')));return;}event.respondWith(caches.match(req).then(cached=>{const network=fetch(req).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy));}return res;}).catch(()=>cached);return cached||network;}));});
