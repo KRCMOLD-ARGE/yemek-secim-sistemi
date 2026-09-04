@@ -1,4 +1,4 @@
-const CACHE='kraw-yemek-v34';
+const CACHE='kraw-yemek-v35';
 const SHELL=['./','./index.html','./app.html','./manifest.webmanifest','./icon.svg','./kraw-wallpaper.png','./order-list.js','./double-select.js','./all-meals-fix.js','./admin-group4.js','./group-tabs.js'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
@@ -10,7 +10,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{
       let html=await res.text();
       const scripts=['order-list.js','double-select.js','all-meals-fix.js','admin-group4.js','group-tabs.js'];
-      scripts.forEach(name=>{if(!html.includes(name))html=html.replace('</body>','<script src="./'+name+'?v=34"></script></body>')});
+      scripts.forEach(name=>{if(!html.includes(name))html=html.replace('</body>','<script src="./'+name+'?v=35"></script></body>')});
       return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
     }).catch(()=>caches.match('./app.html')));
     return;
@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{
       let html=await res.text();
       html=html.replace('m.group_no!==1||allowed.includes(CAT[m.name])','m.group_no!==1||!CAT[m.name]||allowed.includes(CAT[m.name])');
-      html=html.replace('src="app.html"','src="app.html?v=34"');
+      html=html.replace('src="app.html"','src="app.html?v=35"');
       const out=new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
       if(res.ok){const copy=out.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}
       return out;
