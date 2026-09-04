@@ -5,6 +5,7 @@
   const API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-double-api';
   window.D2=window.D2||{1:null,2:null,3:null,4:null};
   let booted=false,installed=false,savingSecond=false;
+  let basePick=null,basePick4=null,baseSave=null;
 
   async function api2(action,p={}){
     const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action,...p})});
@@ -48,28 +49,55 @@
     }catch(e){console.error('İki seçim görünümü:',e)}
   }
 
-  function renderAll(){try{renderPerson();setTimeout(paint,20)}catch(e){setTimeout(paint,20)}}
+  function renderAll(){try{renderPerson();setTimeout(paint,30)}catch(e){setTimeout(paint,30)}}
 
-  function choose(g,id,basePick){
-    g=Number(g);
-    const first=P?.[g]||null,second=window.D2?.[g]||null;
+  function choose(g,id){
+    g=Number(g); id=String(id);
+    const first=P?.[g]?String(P[g]):null;
+    const second=window.D2?.[g]?String(window.D2[g]):null;
+
     if(first===id){
       if(second){P[g]=second;window.D2[g]=null;renderAll()}
       return;
     }
     if(second===id){window.D2[g]=null;renderAll();return}
-    if(!first){P[g]=id;renderAll();return}
+
+    if(!first){
+      if(g===4&&typeof basePick4==='function')basePick4(id);
+      else if(typeof basePick==='function')basePick(g,id);
+      else {P[g]=id;renderAll()}
+      setTimeout(paint,30);
+      return;
+    }
+
     if(!second){
-      if((g===1||g===2)&&typeof basePick==='function'){
-        const keep=first;
-        try{basePick(g,id)}catch(e){}
-        P[g]=keep;
-      }
       window.D2[g]=id;
       renderAll();
       return;
     }
+
     alert(g+'. grupta en fazla 2 yemek seçebilirsiniz. Önce seçili yemeklerden birini kaldırın.');
+  }
+
+  function extractId(meal){
+    const oc=meal.getAttribute('onclick')||'';
+    const m=oc.match(/['\"]([0-9a-fA-F-]{20,})['\"]/);
+    return m?.[1]||null;
+  }
+
+  function captureMealClick(e){
+    const meal=e.target.closest('.meal');
+    if(!meal)return;
+    const group=meal.closest('.group[data-g]');
+    if(!group)return;
+    const g=Number(group.dataset.g||0);
+    if(![1,2,3,4].includes(g))return;
+    const id=extractId(meal);
+    if(!id)return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    choose(g,id);
   }
 
   async function loadSecond(){
@@ -85,9 +113,8 @@
 
   function install(){
     if(installed||typeof pick!=='function'||typeof window.pick4!=='function'||typeof saveSel!=='function')return;
-    const basePick=pick,basePick4=window.pick4,baseSave=saveSel;
-    pick=function(g,id){choose(Number(g),id,basePick)};
-    window.pick4=function(id){choose(4,id,basePick4)};
+    basePick=pick; basePick4=window.pick4; baseSave=saveSel;
+    document.addEventListener('click',captureMealClick,true);
     saveSel=async function(){const r=await baseSave();setTimeout(saveSecond,250);return r};
     installed=true;
     setTimeout(paint,50);
