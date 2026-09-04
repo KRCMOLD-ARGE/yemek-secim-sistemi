@@ -1,12 +1,33 @@
-const CACHE='kraw-yemek-v26';
+const CACHE='kraw-yemek-v27';
 const SHELL=['./','./index.html','./app.html','./manifest.webmanifest','./icon.svg','./kraw-wallpaper.png','./order-list.js','./double-select.js'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
 self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.hostname.includes('supabase.co'))return;
-  if(url.pathname.endsWith('/app.html')){event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{let html=await res.text();if(!html.includes('order-list.js'))html=html.replace('</body>','<script src="./order-list.js?v=26"></script><script src="./double-select.js?v=26"></script></body>');else if(!html.includes('double-select.js'))html=html.replace('</body>','<script src="./double-select.js?v=26"></script></body>');return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers})}).catch(()=>caches.match('./app.html')));return;}
-  if(req.mode==='navigate'){event.respondWith(fetch(req,{cache:'no-store'}).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}return res}).catch(()=>caches.match(req).then(r=>r||caches.match('./index.html'))));return;}
+
+  if(url.pathname.endsWith('/app.html')){
+    event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{let html=await res.text();if(!html.includes('order-list.js'))html=html.replace('</body>','<script src="./order-list.js?v=27"></script><script src="./double-select.js?v=27"></script></body>');else if(!html.includes('double-select.js'))html=html.replace('</body>','<script src="./double-select.js?v=27"></script></body>');return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers})}).catch(()=>caches.match('./app.html')));
+    return;
+  }
+
+  const isIndex=url.pathname.endsWith('/index.html')||url.pathname.endsWith('/yemek-secim-sistemi/');
+  if(isIndex){
+    event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{
+      let html=await res.text();
+      html=html.replace('m.group_no!==1||allowed.includes(CAT[m.name])','m.group_no!==1||!CAT[m.name]||allowed.includes(CAT[m.name])');
+      const out=new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
+      if(res.ok){const copy=out.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}
+      return out;
+    }).catch(()=>caches.match(req).then(r=>r||caches.match('./index.html'))));
+    return;
+  }
+
+  if(req.mode==='navigate'){
+    event.respondWith(fetch(req,{cache:'no-store'}).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}return res}).catch(()=>caches.match(req).then(r=>r||caches.match('./index.html'))));
+    return;
+  }
+
   const fresh=url.pathname.endsWith('/order-list.js')||url.pathname.endsWith('/double-select.js');
   event.respondWith(fetch(req,{cache:fresh?'no-store':'default'}).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}return res}).catch(()=>caches.match(req)));
 });
