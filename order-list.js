@@ -17,11 +17,25 @@
       .kraw-order-no{width:34px;height:34px;border-radius:9px;background:#183d64;display:grid;place-items:center;font-weight:900}
       .kraw-order-meal{font-weight:800;font-size:15px}.kraw-order-label{font-size:12px;color:#9fb3c8;margin-top:2px}
       .kraw-order-done{margin:12px 14px 14px;padding:9px 12px;background:#0b5b46;border:1px solid #16745c;border-radius:9px;color:#d8fff0;font-weight:800;text-align:center}
+      .group[data-g="3"] .portiontag,.group[data-g="3"] .portionmini,.group[data-g="3"] .portionchoice,
+      .group[data-g="4"] .portiontag,.group[data-g="4"] .portionmini,.group[data-g="4"] .portionchoice{display:none!important}
     `;document.head.appendChild(s);
+  }
+
+  function cleanPortionControls(){
+    try{
+      [3,4].forEach(g=>{
+        const group=document.querySelector('.group[data-g="'+g+'"]');
+        if(!group)return;
+        group.querySelectorAll('.portiontag,.portionmini,.portionchoice').forEach(el=>el.remove());
+        group.querySelectorAll('button').forEach(btn=>{const t=(btn.textContent||'').trim();if(t==='Az'||t==='Normal')btn.remove()});
+      });
+    }catch(e){}
   }
 
   function draw(scroll=false){
     try{
+      cleanPortionControls();
       const old=document.getElementById('krawOrderList');
       if(!ready()){if(old)old.remove();return null}
       ensureStyle();
@@ -36,6 +50,14 @@
       return box;
     }catch(e){console.error('Sipariş listesi:',e);return null}
   }
+
+  document.addEventListener('click',e=>{
+    try{
+      const meal=e.target.closest('.meal');if(!meal)return;
+      const g=Number(meal.closest('.group')?.dataset?.g||0);
+      if(g===3||g===4)setTimeout(()=>{document.getElementById('portionModal')?.remove();cleanPortionControls()},0);
+    }catch(err){}
+  },true);
 
   function hookSave(){
     try{
@@ -52,6 +74,6 @@
     }catch(e){}
   }
 
-  setInterval(()=>{hookSave();draw(false)},300);
+  setInterval(()=>{ensureStyle();hookSave();cleanPortionControls();draw(false)},300);
   setTimeout(()=>draw(false),150);
 })();
