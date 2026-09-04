@@ -51,6 +51,15 @@
 
   function renderAll(){try{renderPerson();setTimeout(paint,30)}catch(e){setTimeout(paint,30)}}
 
+  function triggerPortion(g,id,restoreFirst){
+    if(![1,2].includes(Number(g))||typeof basePick!=='function')return false;
+    try{
+      basePick(Number(g),String(id));
+      if(restoreFirst!==undefined)P[g]=restoreFirst;
+      return true;
+    }catch(e){console.error('Porsiyon penceresi:',e);return false}
+  }
+
   function choose(g,id){
     g=Number(g); id=String(id);
     const first=P?.[g]?String(P[g]):null;
@@ -71,15 +80,16 @@
       return;
     }
 
-    // Grupta seçim yoksa yeni ürünü ilk seçim yap.
+    // Grupta seçim yoksa yeni ürünü ilk seçim yap. 1-2. grupta Az/Normal penceresini de aç.
     if(!first){
-      P[g]=id;
+      if(!triggerPortion(g,id))P[g]=id;
       renderAll();
       return;
     }
 
-    // Sadece bir seçim varsa yeni ürünü ikinci seçim yap.
+    // Sadece bir seçim varsa yeni ürünü ikinci seçim yap. 1-2. grupta porsiyon tercihini tekrar sor.
     if(!second){
+      if([1,2].includes(g))triggerPortion(g,id,first);
       window.D2[g]=id;
       renderAll();
       return;
