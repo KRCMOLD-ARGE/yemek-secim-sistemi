@@ -11,7 +11,7 @@
   function ensureStyle(){
     if(document.getElementById('krawOrderListStyle'))return;
     const s=document.createElement('style');s.id='krawOrderListStyle';s.textContent=`
-      .kraw-order-list{margin:16px 0 26px;background:#0d2139;border:1px solid #2a4d70;border-radius:14px;overflow:hidden;color:#eef5ff;box-shadow:0 10px 28px #0003}
+      .kraw-order-list{margin:14px 0 18px;background:#0d2139;border:1px solid #2a4d70;border-radius:14px;overflow:hidden;color:#eef5ff;box-shadow:0 10px 28px #0003}
       .kraw-order-head{padding:14px 16px;background:#122b47;border-bottom:1px solid #2a4d70}.kraw-order-head h3{margin:0 0 4px;font-size:18px}.kraw-order-user{font-weight:800;color:#fff}
       .kraw-order-row{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #203d59}
       .kraw-order-no{width:34px;height:34px;border-radius:9px;background:#183d64;display:grid;place-items:center;font-weight:900}
@@ -20,31 +20,38 @@
     `;document.head.appendChild(s);
   }
 
-  function draw(){
+  function draw(scroll=false){
     try{
       const old=document.getElementById('krawOrderList');
-      if(!ready()){if(old)old.remove();return}
+      if(!ready()){if(old)old.remove();return null}
       ensureStyle();
-      const savebar=document.querySelector('.savebar');if(!savebar)return;
+      const datebar=document.getElementById('datebar');if(!datebar)return null;
       let box=old;
-      if(!box){box=document.createElement('div');box.id='krawOrderList';box.className='kraw-order-list';savebar.insertAdjacentElement('afterend',box)}
+      if(!box){box=document.createElement('div');box.id='krawOrderList';box.className='kraw-order-list';datebar.insertAdjacentElement('afterend',box)}
       const x=ids();
       box.innerHTML=`<div class="kraw-order-head"><h3>📋 Verdiğim Siparişler</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>`<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">${esc2(mealTitle(x[g]))}</div><div class="kraw-order-label">${labels[g]}</div></div></div>`).join('')+
         `<div class="kraw-order-done">✓ Siparişiniz kaydedildi</div>`;
-    }catch(e){console.error('Sipariş listesi:',e)}
+      if(scroll)setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'start'}),80);
+      return box;
+    }catch(e){console.error('Sipariş listesi:',e);return null}
   }
 
   function hookSave(){
     try{
       if(typeof saveSel==='function'&&!saveSel.__savedOrderHook){
         const original=saveSel;
-        saveSel=async function(){await original();setTimeout(draw,500)};
+        saveSel=async function(){await original();setTimeout(()=>draw(false),450)};
         saveSel.__savedOrderHook=true;
+      }
+      if(typeof closeSuccess==='function'&&!closeSuccess.__savedOrderHook){
+        const originalClose=closeSuccess;
+        closeSuccess=function(){originalClose();setTimeout(()=>draw(true),120)};
+        closeSuccess.__savedOrderHook=true;
       }
     }catch(e){}
   }
 
-  setInterval(()=>{hookSave();draw()},300);
-  setTimeout(draw,150);
+  setInterval(()=>{hookSave();draw(false)},300);
+  setTimeout(()=>draw(false),150);
 })();
