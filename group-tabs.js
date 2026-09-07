@@ -20,7 +20,8 @@
       .kraw-group-tab.done:not(.on){filter:saturate(1.15);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
       .kraw-group-tab .tick{display:none;color:#d9ffe8}.kraw-group-tab.done .tick{display:inline}
       #groups.kraw-tabbed>.group{display:none!important;margin-top:10px}#groups.kraw-tabbed>.group.kraw-active-group{display:block!important}
-      .kraw-confirm-wrap{position:sticky;bottom:10px;z-index:18;margin-top:14px}.kraw-confirm-main{width:100%;border:0;border-radius:11px;padding:14px 16px;background:#16965a;color:#fff;font-size:17px;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.28)}.kraw-confirm-main:hover{background:#12824d}
+      .kraw-final-confirm{display:none;margin:16px 0 4px;padding:14px;background:#0b2a46;border:1px solid #2d5278;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.22)}
+      .kraw-final-confirm.show{display:block}.kraw-final-confirm p{margin:0 0 10px;color:#d8eaff;font-weight:700;text-align:center}.kraw-final-confirm button{width:100%;border:0;border-radius:10px;padding:14px 16px;background:#16965a;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.kraw-final-confirm button:hover{background:#12824d}
       @media(max-width:760px){.kraw-group-tabs{grid-template-columns:repeat(2,1fr);top:68px}.kraw-group-tab{font-size:13px;min-height:46px}.kraw-group-tab span.lbl{display:block}}
     `;document.head.appendChild(s);
   }
@@ -42,6 +43,19 @@
     return true;
   }
 
+  function ensureFinalConfirm(){
+    const g4=document.querySelector('#groups .group[data-g="4"]');if(!g4)return null;
+    let box=g4.querySelector('.kraw-final-confirm');
+    if(!box){
+      box=document.createElement('div');box.className='kraw-final-confirm';
+      box.innerHTML='<p>Seçimlerinizi tamamladıysanız siparişinizi onaylayın.</p><button type="button">✓ Siparişi Onayla</button>';
+      box.querySelector('button').onclick=()=>window.krawValidateAndConfirm?.();
+      g4.appendChild(box);
+    }
+    box.classList.toggle('show',!!P?.[4]);
+    return box;
+  }
+
   function paintNow(){
     paintQueued=false;ensureStyle();if(!ensureTabs())return;
     const groups=document.getElementById('groups');if(!groups)return;
@@ -50,6 +64,7 @@
       const b=document.querySelector('#krawGroupTabs .kraw-group-tab[data-g="'+g+'"]');if(b){b.classList.toggle('on',g===activeGroup);b.classList.toggle('done',!!P?.[g])}
     }
     const save=document.getElementById('saveBtn');if(save){save.textContent='✓ Siparişi Onayla';save.onclick=window.krawValidateAndConfirm}
+    ensureFinalConfirm();
   }
   function schedulePaint(){if(paintQueued)return;paintQueued=true;requestAnimationFrame(paintNow)}
 
@@ -69,7 +84,12 @@
     if(typeof saveSel==='function')return saveSel();
   };
 
-  document.addEventListener('click',e=>{const meal=e.target.closest?.('.meal');if(!meal)return;const g=Number(meal.closest('.group')?.dataset?.g||0);if(g>=1&&g<=4)schedulePaint()},true);
+  document.addEventListener('click',e=>{
+    const meal=e.target.closest?.('.meal');if(!meal)return;
+    const g=Number(meal.closest('.group')?.dataset?.g||0);if(g<1||g>4)return;
+    schedulePaint();
+    if(g===4)setTimeout(()=>{const box=ensureFinalConfirm();box?.scrollIntoView({behavior:'smooth',block:'nearest'})},120);
+  },true);
 
   let tries=0;const t=setInterval(()=>{tries++;try{if(typeof S!=='undefined'&&S.user?.role==='personel'){const miss=missingGroups();if(tries<4&&miss.length)activeGroup=miss[0];schedulePaint();if(document.querySelector('#groups .group[data-g="4"]'))clearInterval(t)}if(tries>40)clearInterval(t)}catch(e){}},100);
   setTimeout(schedulePaint,60);
