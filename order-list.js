@@ -41,7 +41,7 @@
       const x=ids();
       card.innerHTML=`<button type="button" class="kraw-order-close" aria-label="Kapat">×</button><div class="kraw-order-head"><h3>📋 Sipariş Listem</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>{const s2=(g===1||g===3)?window.D2?.[g]:null;return `<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">1. ${esc2(mealTitle(x[g]))}</div>${s2?`<div class="kraw-order-meal second">2. ${esc2(mealTitle(s2))}</div>`:''}<div class="kraw-order-label">${labels[g]}</div></div></div>`}).join('')+
-        (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz seçimleri değiştirip tekrar onaylayabilirsiniz.</div>':'<div class="kraw-order-hint">Seçtiğiniz yemekleri kontrol edin. Değişiklik yapmak için pencereyi kapatıp seçimlerinizi değiştirin.</div>')+
+        (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz seçimleri değiştirip tekrar onaylayabilirsiniz.</div>':'<div class="kraw-order-hint">Seçtiğiniz yemekleri kontrol edin.</div>')+
         `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">${S.ownSelection?'✓ Siparişi Güncelle':'✓ Siparişi Onayla'}</button></div>`;
       card.querySelector('.kraw-order-close').onclick=closeModal;
       card.querySelector('#krawOrderConfirmBtn').onclick=confirmOrder;
@@ -51,7 +51,7 @@
 
   async function confirmOrder(){
     if(confirming||!ready())return;
-    const btn=document.getElementById('krawOrderConfirmBtn');
+    const btn=document.getElementById('krawOrderConfirmBtn')||document.getElementById('saveBtn');
     confirming=true;if(btn){btn.disabled=true;btn.textContent='⏳ Onaylanıyor...'}
     try{
       const x=ids();
@@ -60,19 +60,18 @@
       S.ownSelection=result.selection||S.ownSelection;
       if(typeof window.krawSaveLimitedSecond==='function')await window.krawSaveLimitedSecond();
       try{document.getElementById('pm').innerHTML=''}catch(e){}
+      manuallyClosed=false;
       draw(true,true);
     }catch(e){
       try{message('pm','Sipariş kaydedilemedi: '+e.message,true)}catch(_){alert('Sipariş kaydedilemedi: '+e.message)}
-      if(btn){btn.disabled=false;btn.textContent='✓ Siparişi Onayla'}
-    }finally{confirming=false}
+    }finally{
+      confirming=false;
+      const b=document.getElementById('saveBtn');if(b){b.disabled=false;b.textContent='✓ Siparişi Onayla'}
+    }
   }
   window.krawConfirmOrder=confirmOrder;
 
-  document.addEventListener('click',e=>{
-    const meal=e.target.closest?.('.meal');if(!meal)return;
-    const g=Number(meal.closest('.group[data-g]')?.dataset?.g||0);
-    if(g!==4)return;
-    manuallyClosed=false;
-    setTimeout(()=>{if(ready())draw(true,false)},100);
-  },true);
+  // Sipariş listesi artık 4. grup seçimi sırasında otomatik açılmaz.
+  // Personel 4. grubu seçtikten sonra ekrandaki "Siparişi Onayla" düğmesine basar;
+  // kayıt başarılı olursa liste açılır.
 })();
