@@ -14,21 +14,27 @@
 
   function meal4For(userId){return today4.find(x=>x.user_id===userId)?.group4_meal_id||null}
   function secondFor(userId,g){const r=todaySecond.find(x=>x.user_id===userId);return r?.['group'+g+'_meal_id_2']||null}
-  function secondHtml(id){return id?'<div style="margin-top:5px;color:#b77900;font-weight:800"><span style="font-size:11px">2. seçim</span><br>'+mini(id)+'</div>':''}
 
   function patchSecondCells(table,ppl){
     if(!table)return;
-    const headers=[...table.querySelectorAll('thead th, tr:first-child th')];
+    const headers=[...table.querySelectorAll('tr:first-child th')];
     const g1=headers.findIndex(h=>(h.textContent||'').trim()==='1. Grup');
     const g3=headers.findIndex(h=>(h.textContent||'').trim()==='3. Grup');
-    [...table.querySelectorAll('tbody tr, tr')].filter(tr=>tr.querySelector('td')).forEach((tr,i)=>{
+    [...table.querySelectorAll('tr')].slice(1).forEach((tr,i)=>{
+      if(!tr.querySelector('td'))return;
       const u=ppl[i];if(!u)return;
       const cells=[...tr.querySelectorAll('td')];
       [[g1,1],[g3,3]].forEach(([idx,g])=>{
         if(idx<0||!cells[idx])return;
-        cells[idx].querySelector('[data-second-choice]')?.remove();
+        cells[idx].querySelectorAll('[data-second-choice]').forEach(el=>el.remove());
         const id=secondFor(u.id,g);
-        if(id){const wrap=document.createElement('div');wrap.dataset.secondChoice='1';wrap.innerHTML=secondHtml(id);while(wrap.firstChild)cells[idx].appendChild(wrap.firstChild)}
+        if(id){
+          const wrap=document.createElement('div');
+          wrap.dataset.secondChoice='1';
+          wrap.style.cssText='margin-top:5px;color:#b77900;font-weight:800';
+          wrap.innerHTML='<span style="font-size:11px">2. seçim</span><br>'+mini(id);
+          cells[idx].appendChild(wrap);
+        }
       });
     });
   }
