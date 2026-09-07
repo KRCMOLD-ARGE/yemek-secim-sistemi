@@ -1,84 +1,78 @@
 (function(){
-  if(window.__krawModernAdminLoaded)return;
-  window.__krawModernAdminLoaded=true;
+  if(window.__krawModernAdminV2)return;
+  window.__krawModernAdminV2=true;
 
-  function addStyle(){
-    if(document.getElementById('krawModernAdminStyle'))return;
-    const s=document.createElement('style');s.id='krawModernAdminStyle';s.textContent=`
-      #admin.kraw-modern-admin{background:#f4f7fb;min-height:calc(100vh - 64px);position:relative}
-      #admin.kraw-modern-admin>.main{max-width:none;margin:0 0 0 220px;padding:18px 22px 34px}
-      #admin.kraw-modern-admin>.main>h2,#admin.kraw-modern-admin .tabs{display:none!important}
-      .kraw-admin-side{position:fixed;left:0;top:64px;bottom:0;width:220px;background:linear-gradient(180deg,#071a33,#0e2d53);color:#fff;padding:22px 14px;z-index:4;display:flex;flex-direction:column;box-shadow:8px 0 28px rgba(10,36,68,.08)}
-      .kraw-admin-brand{text-align:center;padding:2px 8px 24px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:16px}.kraw-admin-brand .chef{font-size:34px}.kraw-admin-brand b{display:block;font-size:27px;letter-spacing:5px;margin-top:4px}.kraw-admin-brand small{font-size:10px;letter-spacing:2px;opacity:.85}
-      .kraw-admin-nav{display:grid;gap:7px}.kraw-admin-nav button{border:0;background:transparent;color:#e9f2ff;text-align:left;padding:12px 13px;border-radius:9px;font-weight:700;cursor:pointer;font-size:14px}.kraw-admin-nav button:hover,.kraw-admin-nav button.on{background:#2d5f9f;color:#fff}.kraw-admin-nav button span{display:inline-block;width:25px}
-      .kraw-admin-user{margin-top:auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px}.kraw-admin-user .avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#3c7ee8;margin-bottom:8px}.kraw-admin-user b{display:block}.kraw-admin-user small{opacity:.75}
-      .kraw-admin-topcard{background:#fff;border:1px solid #e5ebf2;border-radius:12px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 18px rgba(23,49,78,.05)}
-      .kraw-admin-date{display:flex;gap:11px;align-items:flex-start}.kraw-admin-date .ico{font-size:23px}.kraw-admin-date b{font-size:18px}.kraw-admin-date small{display:block;color:#738096;margin-top:3px}
-      .kraw-admin-state{background:#e7f7ee;color:#176d43;border-radius:10px;padding:10px 13px;font-weight:800;white-space:nowrap}
-      #admin.kraw-modern-admin .stats{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-      #admin.kraw-modern-admin .stat{border:1px solid #e4eaf1;border-radius:12px;padding:15px 16px;box-shadow:0 4px 16px rgba(23,49,78,.04);min-height:92px}
-      #admin.kraw-modern-admin .stat b{font-size:25px;color:#13253b}
-      .kraw-admin-groups{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
-      .kraw-admin-group{background:#fff;border:1px solid #e1e8f0;border-radius:13px;overflow:hidden;box-shadow:0 4px 18px rgba(23,49,78,.04)}
-      .kraw-admin-group-head{padding:12px 14px;font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:space-between}.kraw-admin-group-head small{font-weight:700;opacity:.7}
-      .kraw-admin-group[data-g="1"] .kraw-admin-group-head{background:#fff0f0;color:#9a3030}.kraw-admin-group[data-g="2"] .kraw-admin-group-head{background:#fff5e8;color:#9a5a18}.kraw-admin-group[data-g="3"] .kraw-admin-group-head{background:#edf9ef;color:#276b3d}.kraw-admin-group[data-g="4"] .kraw-admin-group-head{background:#f3edff;color:#5d3b99}
-      .kraw-admin-meals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;padding:10px}.kraw-admin-meal{border:1px solid #e3e8ef;border-radius:9px;overflow:hidden;background:#fff}.kraw-admin-meal img,.kraw-admin-meal .ph{width:100%;height:84px;object-fit:cover;background:#eef3f8;display:grid;place-items:center}.kraw-admin-meal b{display:block;padding:7px 8px 2px;font-size:12px;line-height:1.25}.kraw-admin-meal small{display:block;padding:0 8px 8px;color:#77859a;font-size:10px}
-      #admin.kraw-modern-admin .panel{border:1px solid #e1e8f0;border-radius:12px;box-shadow:0 4px 18px rgba(23,49,78,.04);padding:16px}
-      #admin.kraw-modern-admin table{background:#fff}.kraw-admin-title{font-size:20px;font-weight:900;color:#14263c;margin:5px 0 12px}
-      @media(max-width:1100px){.kraw-admin-meals{grid-template-columns:repeat(3,1fr)}.kraw-admin-groups{grid-template-columns:1fr}}
-      @media(max-width:800px){.kraw-admin-side{position:static;width:auto;min-height:0;display:block}.kraw-admin-brand{display:none}.kraw-admin-nav{grid-template-columns:repeat(2,1fr)}.kraw-admin-user{display:none}#admin.kraw-modern-admin>.main{margin-left:0;padding:12px}.kraw-admin-topcard{align-items:flex-start}.kraw-admin-state{font-size:12px}.kraw-admin-meals{grid-template-columns:repeat(2,1fr)}#admin.kraw-modern-admin .stats{grid-template-columns:1fr 1fr}}
+  const NAMES={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};
+  let lastStamp='';
+
+  function css(){
+    if(document.getElementById('krawAdminV2Style'))return;
+    const s=document.createElement('style');s.id='krawAdminV2Style';s.textContent=`
+      body.kraw-admin-mode{background:#f4f7fb!important;overflow-x:hidden}
+      body.kraw-admin-mode #app>.top{display:none!important}
+      #admin.kraw-admin-v2{display:block!important;min-height:100vh;background:#f4f7fb!important;color:#14243a}
+      #admin.kraw-admin-v2>.main{max-width:none!important;margin:0 0 0 228px!important;padding:18px 22px 36px!important}
+      #admin.kraw-admin-v2>.main>h2,#admin.kraw-admin-v2>.main>.tabs{display:none!important}
+      .ka-side{position:fixed;z-index:50;left:0;top:0;bottom:0;width:228px;padding:24px 14px 16px;background:linear-gradient(180deg,#081b35 0%,#102f55 100%);color:#fff;display:flex;flex-direction:column;box-shadow:8px 0 30px rgba(15,35,60,.10)}
+      .ka-brand{text-align:center;padding:5px 10px 23px;border-bottom:1px solid #ffffff18;margin-bottom:16px}.ka-brand .logo{font-size:33px}.ka-brand strong{display:block;font-size:28px;letter-spacing:6px;margin-top:3px}.ka-brand small{font-size:10px;letter-spacing:2px;color:#c9d8eb}
+      .ka-nav{display:grid;gap:7px}.ka-nav button{border:0;background:transparent;color:#eaf2ff;padding:13px 14px;border-radius:9px;text-align:left;font-weight:800;cursor:pointer;font-size:14px}.ka-nav button:hover,.ka-nav button.on{background:#2d5f9f;color:#fff}.ka-nav i{font-style:normal;width:27px;display:inline-block;font-size:17px}
+      .ka-profile{margin-top:auto;background:#ffffff0d;border:1px solid #ffffff14;border-radius:13px;padding:14px}.ka-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#3f7fe3;font-size:20px;margin-bottom:8px}.ka-profile small{color:#c5d4e7}.ka-profile b{display:block;margin:2px 0 4px}
+      .ka-head{background:#fff;border:1px solid #e2e9f1;border-radius:13px;padding:16px 18px;display:flex;justify-content:space-between;gap:15px;align-items:center;box-shadow:0 4px 18px rgba(20,47,78,.05);margin-bottom:14px}.ka-date{display:flex;gap:12px;align-items:flex-start}.ka-date .icon{font-size:24px}.ka-date b{font-size:19px}.ka-date small{display:block;color:#718096;margin-top:3px}.ka-live{background:#e7f7ee;color:#176d43;padding:10px 14px;border-radius:10px;font-weight:900;white-space:nowrap}
+      #admin.kraw-admin-v2 .stats{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;margin-bottom:14px!important}.ka-stat,#admin.kraw-admin-v2 .stat{background:#fff;border:1px solid #e2e9f1;border-radius:13px;padding:14px 16px;min-height:94px;box-shadow:0 4px 16px rgba(20,47,78,.04)}#admin.kraw-admin-v2 .stat b{font-size:26px!important;color:#14243a}
+      .ka-groups{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 16px}.ka-group{background:#fff;border:1px solid #e1e8f0;border-radius:13px;overflow:hidden;box-shadow:0 4px 18px rgba(20,47,78,.04)}.ka-group-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:900}.ka-group[data-g="1"] .ka-group-head{background:#fff0f0;color:#9c3333}.ka-group[data-g="2"] .ka-group-head{background:#fff5e8;color:#9a5b18}.ka-group[data-g="3"] .ka-group-head{background:#edf9ef;color:#276b3d}.ka-group[data-g="4"] .ka-group-head{background:#f3edff;color:#5e3b9b}.ka-group-head span:last-child{font-size:12px;font-weight:700;opacity:.75}
+      .ka-meals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;padding:10px}.ka-meal{border:1px solid #e3e9ef;border-radius:9px;overflow:hidden;background:#fff;min-width:0}.ka-meal img,.ka-meal .ph{width:100%;height:88px;object-fit:cover;background:#eef3f8;display:grid;place-items:center}.ka-meal b{display:block;padding:7px 8px 2px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ka-meal small{display:block;padding:0 8px 8px;color:#7b8798;font-size:10px}
+      #admin.kraw-admin-v2 .panel{background:#fff!important;border:1px solid #e1e8f0!important;border-radius:13px!important;box-shadow:0 4px 18px rgba(20,47,78,.04)!important;padding:16px!important;margin-bottom:14px!important}#admin.kraw-admin-v2 .panel h2{font-size:19px;color:#14243a}
+      #admin.kraw-admin-v2 table{background:#fff;border-radius:10px;overflow:hidden}#admin.kraw-admin-v2 th{background:#f7f9fc;color:#42526a;font-size:12px}#admin.kraw-admin-v2 td{font-size:12px}
+      #admin.kraw-admin-v2 .summary{grid-template-columns:repeat(4,1fr)!important}
+      #admin.kraw-admin-v2 #people,#admin.kraw-admin-v2 #meals,#admin.kraw-admin-v2 #settings{padding-top:0}
+      .ka-section-title{font-size:22px;font-weight:900;margin:3px 0 14px;color:#14243a}
+      @media(max-width:1180px){.ka-meals{grid-template-columns:repeat(3,1fr)}.ka-groups{grid-template-columns:1fr}#admin.kraw-admin-v2 .stats{grid-template-columns:repeat(3,1fr)!important}}
+      @media(max-width:820px){.ka-side{position:static;width:auto;height:auto}.ka-brand,.ka-profile{display:none}.ka-nav{grid-template-columns:1fr 1fr}#admin.kraw-admin-v2>.main{margin-left:0!important;padding:12px!important}.ka-head{align-items:flex-start}.ka-meals{grid-template-columns:repeat(2,1fr)}#admin.kraw-admin-v2 .stats{grid-template-columns:1fr 1fr!important}}
     `;document.head.appendChild(s);
   }
 
-  function navTo(id,btn){
-    const oldTabs=[...document.querySelectorAll('#admin .tabs .tab')];
-    const map={ov:0,people:1,meals:2,settings:3};
-    const old=oldTabs[map[id]];
-    if(typeof tab==='function'&&old)tab(id,old);else ['ov','people','meals','settings'].forEach(x=>document.getElementById(x)?.classList.toggle('hide',x!==id));
-    document.querySelectorAll('.kraw-admin-nav button').forEach(b=>b.classList.toggle('on',b===btn));
+  function escA(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function mealCard(m){const pic=m.image_url?`<img loading="lazy" src="${escA(m.image_url)}" onerror="this.outerHTML='<div class=ph>🍽️</div>'">`:'<div class="ph">🍽️</div>';return `<div class="ka-meal">${pic}<b title="${escA(m.name)}">${escA(m.name)}</b><small>${m.group_no}. grup</small></div>`}
+
+  function nav(id,btn){
+    ['ov','people','meals','settings'].forEach(x=>document.getElementById(x)?.classList.toggle('hide',x!==id));
+    document.querySelectorAll('.ka-nav button').forEach(x=>x.classList.toggle('on',x===btn));
+    const titles={ov:'Genel Bakış',people:'Personeller',meals:'Yemekler',settings:'Admin Ayarları'};
+    const t=document.getElementById('kaSectionTitle');if(t)t.textContent=titles[id]||'';
   }
 
-  function ensureShell(){
-    const admin=document.getElementById('admin');if(!admin)return false;
-    admin.classList.add('kraw-modern-admin');addStyle();
-    if(!document.getElementById('krawAdminSide')){
-      const side=document.createElement('aside');side.id='krawAdminSide';side.className='kraw-admin-side';
-      side.innerHTML=`<div class="kraw-admin-brand"><div class="chef">👨‍🍳</div><b>KRAW</b><small>YEMEK SEÇİM SİSTEMİ</small></div><div class="kraw-admin-nav"><button class="on" data-target="ov"><span>⌂</span>Genel Bakış</button><button data-target="people"><span>👥</span>Personeller</button><button data-target="meals"><span>🍴</span>Yemekler</button><button data-target="settings"><span>⚙</span>Admin Ayarları</button></div><div class="kraw-admin-user"><div class="avatar">👤</div><small>Hoş geldin,</small><b>${(S?.user?.full_name||'Admin')}</b><small>Yönetici</small></div>`;
-      side.querySelectorAll('button[data-target]').forEach(b=>b.onclick=()=>navTo(b.dataset.target,b));
-      admin.prepend(side);
+  function shell(){
+    if(!S?.user||S.user.role!=='admin')return false;
+    css();document.body.classList.add('kraw-admin-mode');
+    const admin=document.getElementById('admin');if(!admin)return false;admin.classList.add('kraw-admin-v2');
+    if(!document.getElementById('kaSide')){
+      const side=document.createElement('aside');side.id='kaSide';side.className='ka-side';side.innerHTML=`<div class="ka-brand"><div class="logo">👨‍🍳</div><strong>KRAW</strong><small>YEMEK SEÇİM SİSTEMİ</small></div><div class="ka-nav"><button class="on" data-id="ov"><i>⌂</i>Genel Bakış</button><button data-id="people"><i>👥</i>Personeller</button><button data-id="meals"><i>🍴</i>Yemekler</button><button data-id="settings"><i>⚙</i>Admin Ayarları</button></div><div class="ka-profile"><div class="ka-avatar">👤</div><small>Hoş geldin,</small><b>${escA(S.user.full_name||'Admin')}</b><small>Yönetici</small></div>`;side.querySelectorAll('button').forEach(b=>b.onclick=()=>nav(b.dataset.id,b));admin.prepend(side);
     }
-    const main=admin.querySelector('.main');if(main&&!document.getElementById('krawAdminTop')){
-      const top=document.createElement('div');top.id='krawAdminTop';top.className='kraw-admin-topcard';
-      const d=S?.today?new Date(S.today+'T12:00:00'):new Date();
-      const ds=d.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-      top.innerHTML=`<div class="kraw-admin-date"><div class="ico">🗓️</div><div><b>${ds}</b><small>Bugünkü yemek seçimlerini ve sistemi yönetin.</small></div></div><div class="kraw-admin-state">✓ Seçimler aktif</div>`;
-      main.insertBefore(top,main.firstChild);
+    const main=admin.querySelector('.main');if(!main)return false;
+    if(!document.getElementById('kaHead')){
+      const h=document.createElement('div');h.id='kaHead';h.className='ka-head';main.insertBefore(h,main.firstChild);
+      const title=document.createElement('div');title.id='kaSectionTitle';title.className='ka-section-title';title.textContent='Genel Bakış';h.insertAdjacentElement('afterend',title);
     }
+    const d=S.today?new Date(S.today+'T12:00:00'):new Date();const ds=d.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    document.getElementById('kaHead').innerHTML=`<div class="ka-date"><div class="icon">🗓️</div><div><b>${escA(ds)}</b><small>Bugünkü yemek seçimlerini ve sistemi yönetin.</small></div></div><div class="ka-live">● Seçimler aktif</div>`;
     return true;
   }
 
-  function mealCard(m){const pic=m.image_url?`<img loading="lazy" src="${String(m.image_url).replace(/"/g,'&quot;')}" onerror="this.outerHTML='<div class=ph>🍽️</div>'">`:'<div class="ph">🍽️</div>';return `<div class="kraw-admin-meal">${pic}<b>${String(m.name||'')}</b><small>${m.group_no}. grup</small></div>`}
-
-  function addGroupOverview(){
-    if(typeof S==='undefined'||S.user?.role!=='admin')return;
+  function groups(){
+    if(!shell())return;
     const ov=document.getElementById('ov');if(!ov)return;
-    ov.querySelector('#krawAdminGroups')?.remove();
-    const stats=ov.querySelector('.stats');
-    const wrap=document.createElement('div');wrap.id='krawAdminGroups';wrap.className='kraw-admin-groups';
-    const names={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};
+    let wrap=document.getElementById('kaGroups');if(wrap)wrap.remove();wrap=document.createElement('div');wrap.id='kaGroups';wrap.className='ka-groups';
     for(let g=1;g<=4;g++){
-      const meals=(S.meals||[]).filter(m=>Number(m.group_no)===g).slice(0,5);
-      const box=document.createElement('section');box.className='kraw-admin-group';box.dataset.g=String(g);
-      box.innerHTML=`<div class="kraw-admin-group-head"><span>${g}. Grup - ${names[g]}</span><small>${(S.meals||[]).filter(m=>Number(m.group_no)===g).length} yemek</small></div><div class="kraw-admin-meals">${meals.map(mealCard).join('')}</div>`;
-      wrap.appendChild(box);
+      const all=(S.meals||[]).filter(m=>Number(m.group_no)===g);const show=all.slice(0,5);const box=document.createElement('section');box.className='ka-group';box.dataset.g=g;box.innerHTML=`<div class="ka-group-head"><span>${g}. Grup - ${NAMES[g]}</span><span>${all.length} yemek</span></div><div class="ka-meals">${show.map(mealCard).join('')}</div>`;wrap.appendChild(box);
     }
-    if(stats)stats.insertAdjacentElement('afterend',wrap);else ov.prepend(wrap);
+    const stats=ov.querySelector('.stats');if(stats)stats.insertAdjacentElement('afterend',wrap);else ov.prepend(wrap);
   }
 
-  function refresh(){if(!ensureShell())return;addGroupOverview()}
-  let tries=0;const t=setInterval(()=>{tries++;try{if(typeof S!=='undefined'&&S.user?.role==='admin'){refresh();if(document.getElementById('ov')?.children.length)clearInterval(t)}}catch(e){}if(tries>50)clearInterval(t)},120);
-  if(typeof renderAdmin==='function'){
-    const old=renderAdmin;renderAdmin=function(){const r=old.apply(this,arguments);setTimeout(refresh,0);return r};
-  }
-  setTimeout(refresh,180);
+  function refresh(){try{if(S?.user?.role!=='admin')return;shell();groups()}catch(e){console.error('Modern admin:',e)}}
+
+  const original=window.renderAdmin;
+  if(typeof original==='function')window.renderAdmin=function(){const r=original.apply(this,arguments);setTimeout(refresh,0);return r};
+  document.addEventListener('click',e=>{if(e.target.closest('#admin'))setTimeout(refresh,30)},true);
+  let tries=0;const t=setInterval(()=>{tries++;refresh();if(S?.user?.role==='admin'&&document.getElementById('ov')?.children.length)clearInterval(t);if(tries>60)clearInterval(t)},100);
+  setTimeout(refresh,150);
 })();
