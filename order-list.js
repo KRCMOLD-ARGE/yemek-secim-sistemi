@@ -22,6 +22,7 @@
       .kraw-order-no{width:38px;height:38px;border-radius:10px;background:#183d64;display:grid;place-items:center;font-weight:900}
       .kraw-order-meal{font-weight:800;font-size:17px}.kraw-order-meal.second{color:#ffd36a;margin-top:4px}.kraw-order-label{font-size:13px;color:#9fb3c8;margin-top:3px}
       .kraw-order-hint{margin:12px 18px 0;padding:10px 12px;border-radius:9px;background:#173a5a;color:#dcecff;font-size:13px;text-align:center}
+      .kraw-order-ok{margin:12px 18px 0;padding:10px 12px;border-radius:9px;background:#0b5b46;border:1px solid #16745c;color:#d8fff0;font-weight:800;text-align:center}
       .kraw-order-actions{padding:14px 18px 18px}.kraw-order-confirm{width:100%;border:0;border-radius:11px;padding:14px 16px;background:#16965a;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.kraw-order-confirm:hover{background:#12824d}.kraw-order-confirm:disabled{opacity:.6;cursor:not-allowed}
       .group[data-g="3"] .portiontag,.group[data-g="3"] .portionmini,.group[data-g="3"] .portionchoice,.group[data-g="4"] .portiontag,.group[data-g="4"] .portionmini,.group[data-g="4"] .portionchoice{display:none!important}
       @media(max-width:600px){.kraw-order-card{width:96vw}.kraw-order-head h3{font-size:20px}.kraw-order-meal{font-size:15px}.kraw-order-user{font-size:16px}}
@@ -30,6 +31,14 @@
 
   function cleanPortionControls(){try{[3,4].forEach(g=>{const group=document.querySelector('.group[data-g="'+g+'"]');if(!group)return;group.querySelectorAll('.portiontag,.portionmini,.portionchoice').forEach(el=>el.remove());group.querySelectorAll('button').forEach(btn=>{const t=(btn.textContent||'').trim();if(t==='Az'||t==='Normal')btn.remove()})})}catch(e){}}
   function closeModal(){document.getElementById('krawOrderOverlay')?.remove();manuallyClosed=true;}
+  function hideSuccessModal(){try{const m=document.getElementById('successModal');if(m)m.classList.add('hide')}catch(e){}}
+  function guardSuccessModal(){
+    try{
+      const m=document.getElementById('successModal');if(!m||m.__krawGuarded)return;
+      m.__krawGuarded=true;
+      new MutationObserver(()=>{try{if(S?.user?.role==='personel')m.classList.add('hide')}catch(e){}}).observe(m,{attributes:true,attributeFilter:['class']});
+    }catch(e){}
+  }
 
   async function confirmOrder(){
     if(confirming)return;
@@ -51,9 +60,10 @@
         const second=await window.krawSaveLimitedSecond();
         if(second?.second){window.D2[1]=second.second[1]||null;window.D2[3]=second.second[3]||null}
       }
-      try{document.getElementById('pm').innerHTML='<div class="notice">✅ Siparişiniz başarıyla onaylandı.</div>'}catch(e){}
-      if(btn){btn.disabled=false;btn.textContent='✓ Siparişi Güncelle'}
-      draw(true);
+      hideSuccessModal();
+      try{document.getElementById('pm').innerHTML=''}catch(e){}
+      if(btn){btn.disabled=false;btn.textContent='✓ Siparişi Onayla'}
+      draw(true,true);
     }catch(e){
       console.error('Sipariş onayı:',e);
       try{message('pm','Sipariş kaydedilemedi: '+e.message,true)}catch(_) {alert('Sipariş kaydedilemedi: '+e.message)}
@@ -62,9 +72,9 @@
   }
   window.krawConfirmOrder=confirmOrder;
 
-  function draw(forceOpen=false){
+  function draw(forceOpen=false,justSaved=false){
     try{
-      cleanPortionControls();
+      cleanPortionControls();hideSuccessModal();guardSuccessModal();
       if(!ready()){document.getElementById('krawOrderOverlay')?.remove();wasReady=false;manuallyClosed=false;lastSignature='';return null}
       ensureStyle();
       const sig=signature();
@@ -77,8 +87,8 @@
       const x=ids();
       card.innerHTML=`<button type="button" class="kraw-order-close" aria-label="Kapat">×</button><div class="kraw-order-head"><h3>📋 Sipariş Listem</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>{const s2=(g===1||g===3)?window.D2?.[g]:null;return `<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">1. ${esc2(mealTitle(x[g]))}</div>${s2?`<div class="kraw-order-meal second">2. ${esc2(mealTitle(s2))}</div>`:''}<div class="kraw-order-label">${labels[g]}</div></div></div>`}).join('')+
-        `<div class="kraw-order-hint">Kararınızı değiştirirseniz pencereyi kapatıp yeni yemeği seçin; sipariş listesi otomatik güncellenir.</div>`+
-        `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">${S.ownSelection?'✓ Siparişi Güncelle':'✓ Siparişi Onayla'}</button></div>`;
+        (justSaved?`<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. Kararınızı değiştirirseniz seçimleri değiştirip tekrar onaylayabilirsiniz.</div>`:`<div class="kraw-order-hint">Listeyi kontrol edin. Kararınızı değiştirirseniz pencereyi kapatıp yeni yemeği seçebilirsiniz.</div>`)+
+        `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">✓ Siparişi Onayla</button></div>`;
       card.querySelector('.kraw-order-close').onclick=closeModal;
       card.querySelector('#krawOrderConfirmBtn').onclick=confirmOrder;
       lastSignature=sig;if(!wasReady||forceOpen||changed)manuallyClosed=false;wasReady=true;return overlay;
@@ -86,6 +96,6 @@
   }
 
   document.addEventListener('click',e=>{try{const meal=e.target.closest('.meal');if(!meal)return;const g=Number(meal.closest('.group')?.dataset?.g||0);if(g===3||g===4)setTimeout(()=>{document.getElementById('portionModal')?.remove();cleanPortionControls()},0);if([1,2,3,4].includes(g))setTimeout(()=>draw(true),100)}catch(err){}},true);
-  setInterval(()=>{try{if(ready()&&signature()!==lastSignature)draw(true)}catch(e){}},500);
+  setInterval(()=>{try{hideSuccessModal();if(ready()&&signature()!==lastSignature)draw(true)}catch(e){}},500);
   setTimeout(()=>draw(false),180);
 })();
