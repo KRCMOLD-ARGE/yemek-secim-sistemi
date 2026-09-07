@@ -4,6 +4,21 @@
 
   const NAMES={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};
 
+  function cleanupAdminShell(){
+    try{
+      if(S?.user?.role==='admin')return;
+      document.body.classList.remove('kraw-admin-mode');
+      document.getElementById('kaSide')?.remove();
+      document.getElementById('kaHead')?.remove();
+      document.getElementById('kaSectionTitle')?.remove();
+      document.getElementById('admin')?.classList.remove('kraw-admin-v2');
+      const main=document.querySelector('#admin>.main');
+      if(main){main.style.marginLeft='';main.style.padding=''}
+      const personMain=document.querySelector('#person .main');
+      if(personMain){personMain.style.marginLeft='';personMain.style.paddingLeft='';personMain.style.width=''}
+    }catch(e){}
+  }
+
   function css(){
     if(document.getElementById('krawAdminV3Style'))return;
     const s=document.createElement('style');s.id='krawAdminV3Style';s.textContent=`
@@ -60,7 +75,7 @@
   }
 
   function shell(){
-    if(!S?.user||S.user.role!=='admin')return false;
+    if(!S?.user||S.user.role!=='admin'){cleanupAdminShell();return false;}
     css();document.body.classList.add('kraw-admin-mode');
     const admin=document.getElementById('admin');if(!admin)return false;admin.classList.add('kraw-admin-v2');
     ensureGuestsSection();
@@ -90,10 +105,17 @@
     const stats=ov.querySelector('.stats');if(stats)stats.insertAdjacentElement('afterend',wrap);else ov.prepend(wrap);
   }
 
-  function refresh(){try{if(S?.user?.role!=='admin')return;shell();groups()}catch(e){console.error('Modern admin:',e)}}
+  function refresh(){
+    try{
+      if(S?.user?.role!=='admin'){cleanupAdminShell();return;}
+      shell();groups();
+    }catch(e){console.error('Modern admin:',e)}
+  }
 
   const original=window.renderAdmin;
   if(typeof original==='function')window.renderAdmin=function(){const r=original.apply(this,arguments);setTimeout(refresh,0);return r};
+  const originalBoot=window.boot;
+  if(typeof originalBoot==='function')window.boot=async function(){const r=await originalBoot.apply(this,arguments);setTimeout(refresh,0);return r};
   let tries=0;const t=setInterval(()=>{tries++;refresh();if(S?.user?.role==='admin'&&document.getElementById('ov')?.children.length)clearInterval(t);if(tries>60)clearInterval(t)},100);
   setTimeout(refresh,150);
 })();
