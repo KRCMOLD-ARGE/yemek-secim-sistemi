@@ -18,9 +18,13 @@
   function ensureStyle(){
     if(document.getElementById('limitedDoubleStyle'))return;
     const s=document.createElement('style');s.id='limitedDoubleStyle';s.textContent=`
+      .meal.double-first{outline:3px solid #2d78ff!important;box-shadow:0 0 0 2px rgba(45,120,255,.20) inset}
+      .meal.double-first .radio{border:5px solid #2d78ff!important}
       .meal.double-second{outline:3px solid #f5b942!important;box-shadow:0 0 0 2px rgba(245,185,66,.22) inset}
       .meal.double-second .radio{border:5px solid #f5b942!important}
-      .double-badge{position:absolute;top:8px;right:8px;background:#f5b942;color:#172033;border-radius:999px;padding:4px 7px;font-size:11px;font-weight:900;z-index:2;box-shadow:0 2px 8px #0005}
+      .double-badge{position:absolute;top:8px;right:8px;border-radius:999px;padding:4px 7px;font-size:11px;font-weight:900;z-index:2;box-shadow:0 2px 8px #0005}
+      .double-badge.first{background:#2d78ff;color:#fff}
+      .double-badge.second{background:#f5b942;color:#172033}
       .meal{position:relative}.double-note{font-size:12px;color:#b8cee4;margin-left:8px;font-weight:700}
     `;document.head.appendChild(s);
   }
@@ -36,16 +40,23 @@
     return [...group.querySelectorAll('.meal')].find(el=>extractId(el)===String(id))||null;
   }
 
+  function addBadge(el,text,type){
+    if(!el)return;
+    const b=document.createElement('span');b.className='double-badge '+type;b.textContent=text;el.appendChild(b);
+  }
+
   function paintNow(){
     paintQueued=false;ensureStyle();
     [1,3].forEach(g=>{
       const group=document.querySelector('.group[data-g="'+g+'"]');if(!group)return;
       const h=group.querySelector('h3');
       if(h&&!h.querySelector('.double-note')){const n=document.createElement('span');n.className='double-note';n.textContent='En fazla 2 seçim';h.appendChild(n)}
-      group.querySelectorAll('.meal.double-second').forEach(el=>el.classList.remove('double-second'));
+      group.querySelectorAll('.meal.double-first,.meal.double-second').forEach(el=>el.classList.remove('double-first','double-second'));
       group.querySelectorAll('.double-badge').forEach(el=>el.remove());
+      const first=P?.[g];
+      if(first){const el=findMeal(g,first);if(el){el.classList.add('sel','double-first');addBadge(el,'1. seçim','first')}}
       const second=window.D2[g];
-      if(second){const el=findMeal(g,second);if(el){el.classList.add('sel','double-second');const b=document.createElement('span');b.className='double-badge';b.textContent='2. seçim';el.appendChild(b)}}
+      if(second){const el=findMeal(g,second);if(el){el.classList.add('sel','double-second');addBadge(el,'2. seçim','second')}}
     });
     [2,4].forEach(g=>{const group=document.querySelector('.group[data-g="'+g+'"]');if(group)group.querySelectorAll('.double-note,.double-badge').forEach(el=>el.remove())});
   }
