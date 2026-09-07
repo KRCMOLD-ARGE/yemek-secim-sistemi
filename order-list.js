@@ -7,7 +7,7 @@
 
   function esc2(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function mealTitle(id){try{return (S.meals||[]).find(m=>m.id===id)?.name||'-'}catch(e){return '-'}}
-  function ids(){try{return {1:P?.[1]||S.ownSelection?.group1_meal_id,2:P?.[2]||S.ownSelection?.group2_meal_id,3:P?.[3]||S.ownSelection?.group3_meal_id,4:P?.[4]||null}}catch(e){return {}}}
+  function ids(){try{return {1:P?.[1]||null,2:P?.[2]||null,3:P?.[3]||null,4:P?.[4]||null}}catch(e){return {}}}
   function ready(){const x=ids();return !!(S?.user?.role==='personel'&&x[1]&&x[2]&&x[3]&&x[4])}
   function signature(){const x=ids();return [x[1]||'',window.D2?.[1]||'',x[2]||'',x[3]||'',window.D2?.[3]||'',x[4]||''].join('|')}
 
@@ -34,16 +34,14 @@
       if(!ready()){document.getElementById('krawOrderOverlay')?.remove();lastSignature='';return}
       ensureStyle();
       const sig=signature();
-      const changed=!!lastSignature&&sig!==lastSignature;
-      if(changed)manuallyClosed=false;
-      if(manuallyClosed&&!force&&!changed)return;
+      if(manuallyClosed&&!force)return;
       let overlay=document.getElementById('krawOrderOverlay');
       if(!overlay){overlay=document.createElement('div');overlay.id='krawOrderOverlay';overlay.className='kraw-order-overlay';overlay.innerHTML='<div class="kraw-order-card"></div>';document.body.appendChild(overlay)}
       const card=overlay.querySelector('.kraw-order-card');
       const x=ids();
       card.innerHTML=`<button type="button" class="kraw-order-close" aria-label="Kapat">×</button><div class="kraw-order-head"><h3>📋 Sipariş Listem</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>{const s2=(g===1||g===3)?window.D2?.[g]:null;return `<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">1. ${esc2(mealTitle(x[g]))}</div>${s2?`<div class="kraw-order-meal second">2. ${esc2(mealTitle(s2))}</div>`:''}<div class="kraw-order-label">${labels[g]}</div></div></div>`}).join('')+
-        (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz seçimleri değiştirip tekrar onaylayabilirsiniz.</div>':'<div class="kraw-order-hint">Listeyi kontrol edin. Değişiklik yapmak için pencereyi kapatıp yemeği değiştirin.</div>')+
+        (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz seçimleri değiştirip tekrar onaylayabilirsiniz.</div>':'<div class="kraw-order-hint">Seçtiğiniz yemekleri kontrol edin. Değişiklik yapmak için pencereyi kapatıp seçimlerinizi değiştirin.</div>')+
         `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">${S.ownSelection?'✓ Siparişi Güncelle':'✓ Siparişi Onayla'}</button></div>`;
       card.querySelector('.kraw-order-close').onclick=closeModal;
       card.querySelector('#krawOrderConfirmBtn').onclick=confirmOrder;
@@ -61,7 +59,7 @@
       if(!result?.ok)throw Error('Kayıt doğrulanamadı.');
       S.ownSelection=result.selection||S.ownSelection;
       if(typeof window.krawSaveLimitedSecond==='function')await window.krawSaveLimitedSecond();
-      document.getElementById('pm').innerHTML='';
+      try{document.getElementById('pm').innerHTML=''}catch(e){}
       draw(true,true);
     }catch(e){
       try{message('pm','Sipariş kaydedilemedi: '+e.message,true)}catch(_){alert('Sipariş kaydedilemedi: '+e.message)}
@@ -72,9 +70,9 @@
 
   document.addEventListener('click',e=>{
     const meal=e.target.closest?.('.meal');if(!meal)return;
-    setTimeout(()=>{if(ready())draw(true,false)},80);
+    const g=Number(meal.closest('.group[data-g]')?.dataset?.g||0);
+    if(g!==4)return;
+    manuallyClosed=false;
+    setTimeout(()=>{if(ready())draw(true,false)},100);
   },true);
-
-  setTimeout(()=>draw(false,false),250);
-  setTimeout(()=>draw(false,false),900);
 })();
