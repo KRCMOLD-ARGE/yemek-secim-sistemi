@@ -3,9 +3,9 @@
   window.__krawPersonSummaryPortionsLoaded=true;
 
   window.__krawLivePortions=window.__krawLivePortions||{1:null,2:null};
-  let pendingGroup=null;
 
   function label(v){return String(v||'').toLowerCase()==='az'?'Az':'Normal'}
+  function mealName(id){try{return (S?.meals||[]).find(m=>String(m.id)===String(id))?.name||''}catch(e){return ''}}
   function savedPortion(g){
     try{
       const rows=S?.today_portions||[];
@@ -51,17 +51,25 @@
     }catch(e){console.error('Personel özet porsiyon:',e)}
   }
 
+  // İlk ana yemek ve yan yemek porsiyonunu, porsiyon penceresindeki yemek adına göre yakala.
   document.addEventListener('click',e=>{
-    const meal=e.target.closest?.('.meal');
-    if(meal){const g=Number(meal.closest('.group[data-g]')?.dataset?.g||0);if(g===1||g===2)pendingGroup=g}
     const pc=e.target.closest?.('.portionchoice');
-    if(pc&&pendingGroup){window.__krawLivePortions[pendingGroup]=(pc.textContent||'').trim()==='Az'?'Az':'Normal';setTimeout(patch,80)}
+    if(pc){
+      const modal=pc.closest('.portionmodal');
+      const txt=(modal?.querySelector('p')?.textContent||'').trim();
+      const chosen=(pc.textContent||'').trim()==='Az'?'Az':'Normal';
+      const g1=mealName(P?.[1]);
+      const g2=mealName(P?.[2]);
+      if(g1&&txt.includes(g1))window.__krawLivePortions[1]=chosen;
+      else if(g2&&txt.includes(g2))window.__krawLivePortions[2]=chosen;
+      setTimeout(patch,60);
+    }
     const sp=e.target.closest?.('.secondportionchoice');
-    if(sp){setTimeout(patch,80)}
-    if(e.target.closest?.('#saveBtn,#krawOrderConfirmBtn,.kraw-final-confirm button'))setTimeout(patch,250);
+    if(sp)setTimeout(patch,60);
+    if(e.target.closest?.('#saveBtn,#krawOrderConfirmBtn,.kraw-final-confirm button'))setTimeout(patch,220);
   },true);
 
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)patch()});
-  setInterval(patch,1800);
-  setTimeout(patch,350);
+  setInterval(patch,1200);
+  setTimeout(patch,300);
 })();
