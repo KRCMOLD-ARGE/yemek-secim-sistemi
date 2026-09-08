@@ -1,4 +1,4 @@
-const CACHE='kraw-yemek-v66';
+const CACHE='kraw-yemek-v67';
 const SHELL=['./','./index.html','./app.html','./manifest.webmanifest','./icon.svg','./kraw-wallpaper.png','./order-list.js','./double-select.js','./all-meals-fix.js','./admin-group4.js','./admin-delete-order.js','./admin-modern.js','./group-tabs.js','./person-summary.js','./person-summary-portions.js'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting();});
@@ -10,7 +10,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{
       let html=await res.text();
       const scripts=['order-list.js','double-select.js','all-meals-fix.js','admin-group4.js','admin-delete-order.js','admin-modern.js','group-tabs.js','person-summary.js','person-summary-portions.js'];
-      scripts.forEach(name=>{if(!html.includes(name))html=html.replace('</body>','<script src="./'+name+'?v=66"></script></body>')});
+      scripts.forEach(name=>{if(!html.includes(name))html=html.replace('</body>','<script src="./'+name+'?v=67"></script></body>')});
       return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
     }).catch(()=>caches.match('./app.html')));
     return;
@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(req,{cache:'no-store'}).then(async res=>{
       let html=await res.text();
       html=html.replace('m.group_no!==1||allowed.includes(CAT[m.name])','m.group_no!==1||!CAT[m.name]||allowed.includes(CAT[m.name])');
-      html=html.replace('src="app.html"','src="app.html?v=66"');
+      html=html.replace('src="app.html"','src="app.html?v=67"');
       const out=new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
       if(res.ok){const copy=out.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}
       return out;
@@ -34,6 +34,6 @@ self.addEventListener('fetch',event=>{
     return;
   }
 
-  const fresh=['/order-list.js','/double-select.js','/all-meals-fix.js','/admin-group4.js','/admin-delete-order.js','/admin-modern.js','/group-tabs.js','/person-summary.js','/person-summary-portions.js'].some(x=>url.pathname.endsWith(x));
+  const fresh=['/order-list.js','/double-select.js','/all-meals-fix.js','/admin-group4.js','/admin-delete-order.js','admin-modern.js','group-tabs.js','person-summary.js','person-summary-portions.js'].some(x=>url.pathname.endsWith(x));
   event.respondWith(fetch(req,{cache:fresh?'no-store':'default'}).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}return res}).catch(()=>caches.match(req)));
 });
