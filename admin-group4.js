@@ -17,6 +17,7 @@
     const s=document.createElement('style');s.id='krawAdminStableChoiceStyle';s.textContent=`
       #ov table td{vertical-align:top!important}
       #ov table td:nth-child(6),#ov table td:nth-child(7),#ov table td:nth-child(8),#ov table td:nth-child(9){min-height:96px!important}
+      #ov table td .portionmini{display:block!important;margin-top:2px!important;margin-bottom:2px!important}
       [data-second-choice]{min-height:48px;display:block;position:relative;margin-top:6px!important}
       [data-second-choice] .kraw-second-label{display:block;font-size:11px;line-height:14px;color:#b77900;font-weight:900;margin-bottom:3px}
       [data-second-choice] .kraw-second-portion{display:block;font-size:11px;line-height:14px;color:#dc2626;font-weight:900;margin-top:3px;min-height:14px}
@@ -43,6 +44,12 @@
     return null;
   }
 
+  function placeFirstPortionBeforeSecond(cell,wrap){
+    if(!cell||!wrap)return;
+    const p=[...cell.children].find(el=>el.classList?.contains('portionmini'));
+    if(p&&p.nextElementSibling!==wrap)cell.insertBefore(p,wrap);
+  }
+
   function patchSecondCells(table,ppl){
     if(!table)return;
     ensureStableStyle();
@@ -61,6 +68,7 @@
           wrap.dataset.secondChoice=String(g);
           cells[idx].appendChild(wrap);
         }
+        if(g===1)placeFirstPortionBeforeSecond(cells[idx],wrap);
         const id=secondFor(u.id,g);
         if(!id){
           wrap.style.visibility='hidden';
