@@ -5,6 +5,7 @@
   const API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-double-api';
   const DOUBLE_GROUPS=new Set([1,3]);
   window.D2=window.D2||{1:null,2:null,3:null,4:null};
+  window.D2Portion=window.D2Portion||{1:'normal'};
   window.D2[2]=null;window.D2[4]=null;
   let installed=false,booted=false,basePick=null,paintQueued=false;
 
@@ -14,6 +15,12 @@
     if(!r.ok)throw Error(x.error||'İkinci seçim işlemi başarısız');
     return x;
   }
+
+  function portionStorageKey(){
+    try{return 'kraw_second_portion_'+(S?.user?.id||'user')+'_'+(S?.today||'today')}catch(e){return 'kraw_second_portion'}
+  }
+  function saveSecondPortionLocal(){try{localStorage.setItem(portionStorageKey(),window.D2Portion[1]||'normal')}catch(e){}}
+  function loadSecondPortionLocal(){try{window.D2Portion[1]=localStorage.getItem(portionStorageKey())||'normal'}catch(e){window.D2Portion[1]='normal'}}
 
   function ensureStyle(){
     if(document.getElementById('limitedDoubleStyle'))return;
@@ -26,6 +33,10 @@
       .double-badge.first{background:#2d78ff;color:#fff}
       .double-badge.second{background:#f5b942;color:#172033}
       .meal{position:relative}.double-note{font-size:12px;color:#b8cee4;margin-left:8px;font-weight:700}
+      .secondportionbg{position:fixed;inset:0;background:#07111dcc;display:grid;place-items:center;padding:18px;z-index:15050}
+      .secondportionbox{width:min(420px,94vw);background:#fff;color:#172033;border-radius:18px;padding:24px;box-shadow:0 24px 80px #0007;text-align:center}
+      .secondportionbox h2{margin:0 0 8px;font-size:23px}.secondportionbox p{margin:0 0 18px;color:#617083;line-height:1.45}
+      .secondportionchoices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.secondportionchoice{border:1px solid #ccd5e0;background:#f7f9fc;color:#172033;border-radius:10px;padding:14px 8px;font-weight:800;cursor:pointer}.secondportionchoice.on{background:#2869dc;color:#fff;border-color:#2869dc}
     `;document.head.appendChild(s);
   }
 
@@ -43,6 +54,15 @@
   function addBadge(el,text,type){
     if(!el)return;
     const b=document.createElement('span');b.className='double-badge '+type;b.textContent=text;el.appendChild(b);
+  }
+
+  function askSecondPortion(mealName){
+    ensureStyle();
+    document.getElementById('secondPortionModal')?.remove();
+    const bg=document.createElement('div');bg.id='secondPortionModal';bg.className='secondportionbg';
+    bg.innerHTML=`<div class="secondportionbox"><h2>🍽️ Porsiyon Tercihi</h2><p><b>${String(mealName||'2. yemek').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</b> için porsiyonunuz nasıl olsun?</p><div class="secondportionchoices"><button type="button" class="secondportionchoice ${window.D2Portion[1]==='az'?'on':''}" data-v="az">Az</button><button type="button" class="secondportionchoice ${window.D2Portion[1]!=='az'?'on':''}" data-v="normal">Normal</button></div></div>`;
+    bg.querySelectorAll('.secondportionchoice').forEach(b=>b.onclick=()=>{window.D2Portion[1]=b.dataset.v==='az'?'az':'normal';saveSecondPortionLocal();bg.remove();});
+    document.body.appendChild(bg);
   }
 
   function paintNow(){
@@ -74,7 +94,11 @@
     }
     if(second===id){window.D2[g]=null;schedulePaint();return}
     if(!first){basePick(g,id);setTimeout(schedulePaint,20);return}
-    if(!second){window.D2[g]=id;schedulePaint();return}
+    if(!second){
+      window.D2[g]=id;schedulePaint();
+      if(g===1){const m=(S.meals||[]).find(x=>String(x.id)===id);setTimeout(()=>askSecondPortion(m?.name||'2. yemek'),20)}
+      return;
+    }
     alert(g+'. grupta en fazla 2 yemek seçebilirsiniz. Değiştirmek istediğiniz seçime tekrar basarak önce kaldırın.');
   }
 
@@ -88,11 +112,12 @@
 
   async function load(){
     if(booted||typeof S==='undefined'||S.user?.role!=='personel')return;
-    try{const x=await api2('bootstrap');window.D2[1]=x.second?.[1]||null;window.D2[3]=x.second?.[3]||null;window.D2[2]=null;window.D2[4]=null;booted=true;schedulePaint()}catch(e){console.error('İkinci seçim:',e)}
+    try{const x=await api2('bootstrap');window.D2[1]=x.second?.[1]||null;window.D2[3]=x.second?.[3]||null;window.D2[2]=null;window.D2[4]=null;loadSecondPortionLocal();booted=true;schedulePaint()}catch(e){console.error('İkinci seçim:',e)}
   }
 
   window.krawSaveLimitedSecond=async function(){
     if(typeof S==='undefined'||S.user?.role!=='personel')return {ok:true};
+    saveSecondPortionLocal();
     return api2('save',{group1_meal_id_2:window.D2[1]||null,group2_meal_id_2:null,group3_meal_id_2:window.D2[3]||null,group4_meal_id_2:null});
   };
 
