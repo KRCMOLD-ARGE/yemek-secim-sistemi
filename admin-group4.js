@@ -13,7 +13,18 @@
   const dapi=(action,p={})=>post(DAPI,action,p);
 
   function meal4For(userId){return today4.find(x=>x.user_id===userId)?.group4_meal_id||null}
-  function secondFor(userId,g){const r=todaySecond.find(x=>x.user_id===userId);return r?.['group'+g+'_meal_id_2']||null}
+  function secondRow(userId){return todaySecond.find(x=>x.user_id===userId)||null}
+  function secondFor(userId,g){const r=secondRow(userId);return r?.['group'+g+'_meal_id_2']||null}
+  function secondPortionFor(userId){
+    const r=secondRow(userId)||{};
+    const raw=r.group1_portion_2||r.group1_portion_size_2||r.portion_size_group1_2||r.second_portion||null;
+    if(raw)return String(raw).toLowerCase()==='az'?'Az':'Normal';
+    try{
+      const v=localStorage.getItem('kraw_second_portion_'+userId+'_'+(S?.today||'today'));
+      if(v)return v==='az'?'Az':'Normal';
+    }catch(e){}
+    return null;
+  }
 
   function patchSecondCells(table,ppl){
     if(!table)return;
@@ -32,7 +43,8 @@
           const wrap=document.createElement('div');
           wrap.dataset.secondChoice='1';
           wrap.style.cssText='margin-top:5px;color:#b77900;font-weight:800';
-          wrap.innerHTML='<span style="font-size:11px">2. seçim</span><br>'+mini(id);
+          const portion=g===1?secondPortionFor(u.id):null;
+          wrap.innerHTML='<span style="font-size:11px">2. seçim</span><br>'+mini(id)+(portion?'<div style="font-size:11px;color:#dc2626;font-weight:900;margin-top:2px">'+portion+'</div>':'');
           cells[idx].appendChild(wrap);
         }
       });
