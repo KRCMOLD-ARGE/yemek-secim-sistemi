@@ -29,6 +29,7 @@
   function secondRow(userId){return todaySecond.find(x=>x.user_id===userId)||null}
   function secondFor(userId,g){const r=secondRow(userId);return r?.['group'+g+'_meal_id_2']||null}
   function portionCacheKey(userId){return 'kraw_admin_second_portion_'+(S?.today||'today')+'_'+userId}
+  function personPortionKey(userId){return 'kraw_second_portion_'+userId+'_'+(S?.today||'today')}
   function secondPortionFor(userId){
     const r=secondRow(userId)||{};
     const raw=r.group1_portion_2||r.group1_portion_size_2||r.portion_size_group1_2||r.second_portion||null;
@@ -38,6 +39,12 @@
       return val;
     }
     try{
+      const personnelValue=localStorage.getItem(personPortionKey(userId));
+      if(personnelValue){
+        const val=String(personnelValue).toLowerCase()==='az'?'Az':'Normal';
+        localStorage.setItem(portionCacheKey(userId),val);
+        return val;
+      }
       const cached=localStorage.getItem(portionCacheKey(userId));
       if(cached==='Az'||cached==='Normal')return cached;
     }catch(e){}
