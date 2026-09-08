@@ -27,13 +27,18 @@
   function meal4For(userId){return today4.find(x=>x.user_id===userId)?.group4_meal_id||null}
   function secondRow(userId){return todaySecond.find(x=>x.user_id===userId)||null}
   function secondFor(userId,g){const r=secondRow(userId);return r?.['group'+g+'_meal_id_2']||null}
+  function portionCacheKey(userId){return 'kraw_admin_second_portion_'+(S?.today||'today')+'_'+userId}
   function secondPortionFor(userId){
     const r=secondRow(userId)||{};
     const raw=r.group1_portion_2||r.group1_portion_size_2||r.portion_size_group1_2||r.second_portion||null;
-    if(raw)return String(raw).toLowerCase()==='az'?'Az':'Normal';
+    if(raw){
+      const val=String(raw).toLowerCase()==='az'?'Az':'Normal';
+      try{localStorage.setItem(portionCacheKey(userId),val)}catch(e){}
+      return val;
+    }
     try{
-      const v=localStorage.getItem('kraw_second_portion_'+userId+'_'+(S?.today||'today'));
-      if(v)return v==='az'?'Az':'Normal';
+      const cached=localStorage.getItem(portionCacheKey(userId));
+      if(cached==='Az'||cached==='Normal')return cached;
     }catch(e){}
     return null;
   }
@@ -57,10 +62,15 @@
           cells[idx].appendChild(wrap);
         }
         const id=secondFor(u.id,g);
-        if(!id){wrap.style.visibility='hidden';wrap.innerHTML='<span class="kraw-second-label">2. seçim</span><div style="height:22px"></div><span class="kraw-second-portion">&nbsp;</span>';return}
+        if(!id){
+          wrap.style.visibility='hidden';
+          wrap.innerHTML='<span class="kraw-second-label">2. seçim</span><div style="height:22px"></div><span class="kraw-second-portion">&nbsp;</span>';
+          return;
+        }
         wrap.style.visibility='visible';
         const portion=g===1?secondPortionFor(u.id):null;
-        wrap.innerHTML='<span class="kraw-second-label">2. seçim</span>'+mini(id)+(g===1?'<span class="kraw-second-portion">'+(portion||'&nbsp;')+'</span>':'');
+        const newHtml='<span class="kraw-second-label">2. seçim</span>'+mini(id)+(g===1?'<span class="kraw-second-portion">'+(portion||'&nbsp;')+'</span>':'');
+        if(wrap.innerHTML!==newHtml)wrap.innerHTML=newHtml;
       });
     });
   }
@@ -86,7 +96,11 @@
       patchSecondCells(table,ppl);
     }
     const summary=panels.find(x=>x.querySelector('h2')?.textContent?.includes('Bugünkü Seçim Özeti'))?.querySelector('.summary');
-    if(summary){summary.querySelector('[data-admin-g4-summary]')?.remove();const box=document.createElement('div');box.innerHTML=summaryBox4();summary.appendChild(box.firstElementChild)}
+    if(summary){
+      const old=summary.querySelector('[data-admin-g4-summary]');
+      const html=summaryBox4();
+      if(old){if(old.outerHTML!==html)old.outerHTML=html}else{const box=document.createElement('div');box.innerHTML=html;summary.appendChild(box.firstElementChild)}
+    }
     document.getElementById('group4AdminPanel')?.remove();
   }
 
@@ -103,7 +117,7 @@
       todaySecond=qd.today_second||[];
       patchAdmin();
       return true;
-    }catch(e){console.error('Admin ek seçimler:',e);return false}
+    }catch(e){console.error('Admin ek seçimler:',e);patchAdmin();return false}
   }
 
   const oldRender=renderAdmin;
