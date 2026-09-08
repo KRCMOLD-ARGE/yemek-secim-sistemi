@@ -2,10 +2,24 @@
   if(window.__krawPersonSummaryPortionsLoaded)return;
   window.__krawPersonSummaryPortionsLoaded=true;
 
+  const PORTION_API='https://uviroysnefifverluald.supabase.co/functions/v1/yemek-portion-api';
   window.__krawLivePortions=window.__krawLivePortions||{1:null,2:null};
+  let apiPortions={1:null,2:null};
 
   function label(v){return String(v||'').toLowerCase()==='az'?'Az':'Normal'}
   function mealName(id){try{return (S?.meals||[]).find(m=>String(m.id)===String(id))?.name||''}catch(e){return ''}}
+
+  async function loadApiPortions(){
+    try{
+      if(S?.user?.role!=='personel')return;
+      const r=await fetch(PORTION_API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'x-session-token':token},body:JSON.stringify({action:'bootstrap'})});
+      const q=await r.json().catch(()=>null);if(!r.ok||!q)return;
+      if(q.portions){apiPortions[1]=q.portions[1]?label(q.portions[1]):null;apiPortions[2]=q.portions[2]?label(q.portions[2]):null}
+      if(Array.isArray(q.today_portions))S.today_portions=q.today_portions;
+      patch();
+    }catch(e){console.error('Porsiyon özeti bootstrap:',e)}
+  }
+
   function savedPortion(g){
     try{
       const rows=S?.today_portions||[];
@@ -15,7 +29,7 @@
       return raw?label(raw):null;
     }catch(e){return null}
   }
-  function firstPortion(g){return window.__krawLivePortions[g]||savedPortion(g)||null}
+  function firstPortion(g){return window.__krawLivePortions[g]||apiPortions[g]||savedPortion(g)||null}
   function secondPortion(){
     try{
       if(window.D2Portion?.[1])return label(window.D2Portion[1]);
@@ -51,25 +65,23 @@
     }catch(e){console.error('Personel özet porsiyon:',e)}
   }
 
-  // İlk ana yemek ve yan yemek porsiyonunu, porsiyon penceresindeki yemek adına göre yakala.
   document.addEventListener('click',e=>{
     const pc=e.target.closest?.('.portionchoice');
     if(pc){
       const modal=pc.closest('.portionmodal');
       const txt=(modal?.querySelector('p')?.textContent||'').trim();
       const chosen=(pc.textContent||'').trim()==='Az'?'Az':'Normal';
-      const g1=mealName(P?.[1]);
-      const g2=mealName(P?.[2]);
+      const g1=mealName(P?.[1]),g2=mealName(P?.[2]);
       if(g1&&txt.includes(g1))window.__krawLivePortions[1]=chosen;
       else if(g2&&txt.includes(g2))window.__krawLivePortions[2]=chosen;
-      setTimeout(patch,60);
+      setTimeout(patch,50);
     }
-    const sp=e.target.closest?.('.secondportionchoice');
-    if(sp)setTimeout(patch,60);
-    if(e.target.closest?.('#saveBtn,#krawOrderConfirmBtn,.kraw-final-confirm button'))setTimeout(patch,220);
+    if(e.target.closest?.('.secondportionchoice'))setTimeout(patch,50);
+    if(e.target.closest?.('#saveBtn,#krawOrderConfirmBtn,.kraw-final-confirm button'))setTimeout(loadApiPortions,350);
   },true);
 
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)patch()});
-  setInterval(patch,1200);
-  setTimeout(patch,300);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadApiPortions()});
+  setInterval(patch,1000);
+  setInterval(loadApiPortions,5000);
+  setTimeout(()=>{patch();loadApiPortions()},300);
 })();
