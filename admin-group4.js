@@ -12,6 +12,18 @@
   const g4api=(action,p={})=>post(G4API,action,p);
   const dapi=(action,p={})=>post(DAPI,action,p);
 
+  function ensureStableStyle(){
+    if(document.getElementById('krawAdminStableChoiceStyle'))return;
+    const s=document.createElement('style');s.id='krawAdminStableChoiceStyle';s.textContent=`
+      #ov table td{vertical-align:top!important}
+      #ov table td:nth-child(6),#ov table td:nth-child(7),#ov table td:nth-child(8),#ov table td:nth-child(9){min-height:96px!important}
+      [data-second-choice]{min-height:48px;display:block;position:relative;margin-top:6px!important}
+      [data-second-choice] .kraw-second-label{display:block;font-size:11px;line-height:14px;color:#b77900;font-weight:900;margin-bottom:3px}
+      [data-second-choice] .kraw-second-portion{display:block;font-size:11px;line-height:14px;color:#dc2626;font-weight:900;margin-top:3px;min-height:14px}
+      [data-g4-cell]{min-width:130px}
+    `;document.head.appendChild(s);
+  }
+
   function meal4For(userId){return today4.find(x=>x.user_id===userId)?.group4_meal_id||null}
   function secondRow(userId){return todaySecond.find(x=>x.user_id===userId)||null}
   function secondFor(userId,g){const r=secondRow(userId);return r?.['group'+g+'_meal_id_2']||null}
@@ -28,6 +40,7 @@
 
   function patchSecondCells(table,ppl){
     if(!table)return;
+    ensureStableStyle();
     const headers=[...table.querySelectorAll('tr:first-child th')];
     const g1=headers.findIndex(h=>(h.textContent||'').trim()==='1. Grup');
     const g3=headers.findIndex(h=>(h.textContent||'').trim()==='3. Grup');
@@ -37,22 +50,24 @@
       const cells=[...tr.querySelectorAll('td')];
       [[g1,1],[g3,3]].forEach(([idx,g])=>{
         if(idx<0||!cells[idx])return;
-        cells[idx].querySelectorAll('[data-second-choice]').forEach(el=>el.remove());
-        const id=secondFor(u.id,g);
-        if(id){
-          const wrap=document.createElement('div');
-          wrap.dataset.secondChoice='1';
-          wrap.style.cssText='margin-top:5px;color:#b77900;font-weight:800';
-          const portion=g===1?secondPortionFor(u.id):null;
-          wrap.innerHTML='<span style="font-size:11px">2. seçim</span><br>'+mini(id)+(portion?'<div style="font-size:11px;color:#dc2626;font-weight:900;margin-top:2px">'+portion+'</div>':'');
+        let wrap=cells[idx].querySelector('[data-second-choice="'+g+'"]');
+        if(!wrap){
+          wrap=document.createElement('div');
+          wrap.dataset.secondChoice=String(g);
           cells[idx].appendChild(wrap);
         }
+        const id=secondFor(u.id,g);
+        if(!id){wrap.style.visibility='hidden';wrap.innerHTML='<span class="kraw-second-label">2. seçim</span><div style="height:22px"></div><span class="kraw-second-portion">&nbsp;</span>';return}
+        wrap.style.visibility='visible';
+        const portion=g===1?secondPortionFor(u.id):null;
+        wrap.innerHTML='<span class="kraw-second-label">2. seçim</span>'+mini(id)+(g===1?'<span class="kraw-second-portion">'+(portion||'&nbsp;')+'</span>':'');
       });
     });
   }
 
   function patchAdmin(){
     if(typeof S==='undefined'||!S.user||S.user.role!=='admin')return;
+    ensureStableStyle();
     const ov=document.getElementById('ov');if(!ov)return;
     const ppl=(S.users||[]).filter(u=>u.role==='personel');
     const panels=[...ov.querySelectorAll('.panel')];
@@ -65,7 +80,8 @@
         if(!tr.querySelector('td'))return;
         let td=tr.querySelector('[data-g4-cell]');
         if(!td){td=document.createElement('td');td.dataset.g4Cell='1';tr.appendChild(td)}
-        td.innerHTML=mini(meal4For(ppl[i]?.id));
+        const html=mini(meal4For(ppl[i]?.id));
+        if(td.innerHTML!==html)td.innerHTML=html;
       });
       patchSecondCells(table,ppl);
     }
