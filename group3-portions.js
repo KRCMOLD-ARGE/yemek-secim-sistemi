@@ -42,19 +42,28 @@
     bg.querySelectorAll('.g3portionchoice').forEach(b=>b.onclick=()=>{save(slot,b.dataset.v==='az'?'az':'normal');bg.remove();asking=false});
     document.body.appendChild(bg);
   }
-  function check(){
+  function syncAndAsk(){
     try{
       if(typeof S==='undefined'||S.user?.role!=='personel')return;
       load();
       const first=P?.[3]?String(P[3]):null;
       const second=window.D2?.[3]?String(window.D2[3]):null;
-      if(first&&first!==lastFirst){lastFirst=first;window.G3Portion[1]=null;try{localStorage.removeItem(key(1))}catch(e){};setTimeout(()=>ask(1,first),40)}
+      if(first&&first!==lastFirst){lastFirst=first;window.G3Portion[1]=null;try{localStorage.removeItem(key(1))}catch(e){};setTimeout(()=>ask(1,first),20)}
       if(!first)lastFirst=null;
-      if(second&&second!==lastSecond){lastSecond=second;window.G3Portion[2]=null;try{localStorage.removeItem(key(2))}catch(e){};setTimeout(()=>ask(2,second),80)}
+      if(second&&second!==lastSecond){lastSecond=second;window.G3Portion[2]=null;try{localStorage.removeItem(key(2))}catch(e){};setTimeout(()=>ask(2,second),40)}
       if(!second)lastSecond=null;
     }catch(e){console.error('3. grup porsiyon:',e)}
   }
+
+  // 3. grup yemek kartına basılır basılmaz kontrol et; polling sadece yedek mekanizma.
+  document.addEventListener('click',e=>{
+    const meal=e.target.closest?.('.group[data-g="3"] .meal');
+    if(meal)setTimeout(syncAndAsk,15);
+  },true);
+  document.addEventListener('kraw-group3-selection-change',()=>setTimeout(syncAndAsk,10));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncAndAsk()});
+
   load();
-  setInterval(check,180);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+  setInterval(syncAndAsk,250);
+  setTimeout(syncAndAsk,120);
 })();
