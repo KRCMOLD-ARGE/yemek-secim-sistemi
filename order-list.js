@@ -5,7 +5,7 @@
   const labels={1:'Ana Yemek',2:'Yan Yemek',3:'Yoğurt / Cacık / Salata',4:'Tatlı / Meyve'};
   let confirming=false,manuallyClosed=false,lastSignature='',toastTimer=null;
 
-  function esc2(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function esc2(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
   function mealTitle(id){try{return (S.meals||[]).find(m=>m.id===id)?.name||'-'}catch(e){return '-'}}
   function ids(){try{return {1:P?.[1]||null,2:P?.[2]||null,3:P?.[3]||null,4:P?.[4]||null}}catch(e){return {}}}
   function ready(){const x=ids();return !!(S?.user?.role==='personel'&&x[1]&&x[2]&&x[3]&&x[4])}
@@ -29,24 +29,9 @@
     `;document.head.appendChild(s);
   }
 
-  function hideTopNotice(){
-    clearTimeout(toastTimer);
-    const n=document.getElementById('krawTopNotice');if(!n)return;
-    n.classList.remove('show');setTimeout(()=>n.remove(),300);
-  }
-
-  function showTopNotice(){
-    ensureStyle();
-    document.getElementById('krawTopNotice')?.remove();
-    const n=document.createElement('div');n.id='krawTopNotice';n.className='kraw-top-notice';
-    n.innerHTML='<div class="ico">✓</div><div><b>Siparişiniz onaylandı</b><span>Yemek seçimleriniz başarıyla kaydedildi. Sipariş listeniz açıldı.</span></div><button type="button" class="kraw-top-notice-close" aria-label="Bildirimi kapat">×</button>';
-    n.querySelector('.kraw-top-notice-close').onclick=hideTopNotice;
-    document.body.appendChild(n);
-    requestAnimationFrame(()=>n.classList.add('show'));
-    clearTimeout(toastTimer);toastTimer=setTimeout(hideTopNotice,4500);
-  }
-
-  function closeModal(){document.getElementById('krawOrderOverlay')?.remove();manuallyClosed=true;}
+  function hideTopNotice(){clearTimeout(toastTimer);const n=document.getElementById('krawTopNotice');if(!n)return;n.classList.remove('show');setTimeout(()=>n.remove(),300)}
+  function showTopNotice(){ensureStyle();document.getElementById('krawTopNotice')?.remove();const n=document.createElement('div');n.id='krawTopNotice';n.className='kraw-top-notice';n.innerHTML='<div class="ico">✓</div><div><b>Siparişiniz onaylandı</b><span>Yemek seçimleriniz başarıyla kaydedildi. Sipariş listeniz açıldı.</span></div><button type="button" class="kraw-top-notice-close" aria-label="Bildirimi kapat">×</button>';n.querySelector('.kraw-top-notice-close').onclick=hideTopNotice;document.body.appendChild(n);requestAnimationFrame(()=>n.classList.add('show'));clearTimeout(toastTimer);toastTimer=setTimeout(hideTopNotice,4500)}
+  function closeModal(){document.getElementById('krawOrderOverlay')?.remove();manuallyClosed=true}
 
   function draw(force=false,saved=false){
     try{
@@ -61,7 +46,7 @@
       card.innerHTML=`<button type="button" class="kraw-order-close" aria-label="Kapat">×</button><div class="kraw-order-head"><h3>📋 Sipariş Listem</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>{const s2=(g===1||g===3)?window.D2?.[g]:null;return `<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">1. ${esc2(mealTitle(x[g]))}</div>${s2?`<div class="kraw-order-meal second">2. ${esc2(mealTitle(s2))}</div>`:''}<div class="kraw-order-label">${labels[g]}</div></div></div>`}).join('')+
         (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz pencereyi kapatıp seçimlerinizi değiştirebilirsiniz.</div>':'<div class="kraw-order-hint">Seçtiğiniz yemekleri kontrol edin.</div>')+
-        `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">${S.ownSelection?'✓ Siparişi Güncelle':'✓ Siparişi Onayla'}</button></div>`;
+        `<div class="kraw-order-actions"><button id="krawOrderConfirmBtn" class="kraw-order-confirm" type="button">✓ Siparişi Oluştur</button></div>`;
       card.querySelector('.kraw-order-close').onclick=closeModal;
       card.querySelector('#krawOrderConfirmBtn').onclick=confirmOrder;
       lastSignature=sig;manuallyClosed=false;
@@ -79,18 +64,9 @@
       S.ownSelection=result.selection||S.ownSelection;
       if(typeof window.krawSaveLimitedSecond==='function')await window.krawSaveLimitedSecond();
       try{document.getElementById('pm').innerHTML=''}catch(e){}
-      manuallyClosed=false;
-      draw(true,true);
-      showTopNotice();
-    }catch(e){
-      try{message('pm','Sipariş kaydedilemedi: '+e.message,true)}catch(_){alert('Sipariş kaydedilemedi: '+e.message)}
-    }finally{
-      confirming=false;
-      const b=document.getElementById('saveBtn');if(b){b.disabled=false;b.textContent='✓ Siparişi Onayla'}
-    }
+      manuallyClosed=false;draw(true,true);showTopNotice();
+    }catch(e){try{message('pm','Sipariş kaydedilemedi: '+e.message,true)}catch(_){alert('Sipariş kaydedilemedi: '+e.message)}}
+    finally{confirming=false;const b=document.getElementById('saveBtn');if(b){b.disabled=false;b.textContent='✓ Siparişi Onayla'}}
   }
   window.krawConfirmOrder=confirmOrder;
-
-  // 4. grup seçildikten sonra liste otomatik açılmaz.
-  // Personel alttaki Siparişi Onayla butonuna basar; kayıt başarılı olunca liste ve üst bildirim açılır.
 })();
