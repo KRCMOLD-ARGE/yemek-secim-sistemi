@@ -32,8 +32,9 @@
       .g3portionchoice.on{background:#2869dc;color:#fff;border-color:#2869dc}
     `;document.head.appendChild(s);
   }
-  function ask(slot,id){
-    if(asking||!id)return;
+  function ask(slot,id,force=false){
+    if(!id)return;
+    if(asking&&!force)return;
     asking=true;style();
     document.getElementById('g3PortionModal')?.remove();
     const current=window.G3Portion[slot]||'normal';
@@ -42,6 +43,15 @@
     bg.querySelectorAll('.g3portionchoice').forEach(b=>b.onclick=()=>{save(slot,b.dataset.v==='az'?'az':'normal');bg.remove();asking=false});
     document.body.appendChild(bg);
   }
+
+  window.krawAskGroup3Portion=function(slot,id){
+    load();
+    const s=Number(slot)===2?2:1;
+    window.G3Portion[s]=null;
+    try{localStorage.removeItem(key(s))}catch(e){}
+    ask(s,id,true);
+  };
+
   function syncAndAsk(){
     try{
       if(typeof S==='undefined'||S.user?.role!=='personel')return;
@@ -55,7 +65,6 @@
     }catch(e){console.error('3. grup porsiyon:',e)}
   }
 
-  // 3. grup yemek kartına basılır basılmaz kontrol et; polling sadece yedek mekanizma.
   document.addEventListener('click',e=>{
     const meal=e.target.closest?.('.group[data-g="3"] .meal');
     if(meal)setTimeout(syncAndAsk,15);
