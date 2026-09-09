@@ -37,12 +37,23 @@
       const v=localStorage.getItem(k);return v?label(v):null;
     }catch(e){return null}
   }
+  function group3Portion(slot){
+    try{
+      if(window.G3Portion?.[slot])return label(window.G3Portion[slot]);
+      const k='kraw_group3_portion_'+slot+'_'+(S?.user?.id||'user')+'_'+(S?.today||'today');
+      const v=localStorage.getItem(k);return v?label(v):null;
+    }catch(e){return null}
+  }
   function ensureStyle(){
     if(document.getElementById('krawPersonSummaryPortionStyle'))return;
     const s=document.createElement('style');s.id='krawPersonSummaryPortionStyle';s.textContent=`
       #krawSideSummary .kraw-summary-portion{font-size:11px;font-weight:900;color:#ff6b6b;margin-top:2px;line-height:1.2}
       #krawSideSummary .kraw-summary-portion.second{color:#ffd36a}
     `;document.head.appendChild(s);
+  }
+  function addPortion(afterEl,text,second=false){
+    if(!afterEl||!text)return;
+    const d=document.createElement('div');d.className='kraw-summary-portion'+(second?' second':'');d.textContent=text;afterEl.insertAdjacentElement('afterend',d)
   }
   function patch(){
     try{
@@ -52,15 +63,12 @@
       const rows=[...card.querySelectorAll('.kraw-side-row')];
       rows.forEach((row,i)=>{
         row.querySelectorAll('.kraw-summary-portion').forEach(x=>x.remove());
-        const g=i+1;if(g!==1&&g!==2)return;
+        const g=i+1;
         const first=row.querySelector('.kraw-side-meal:not(.second)');
-        const p1=firstPortion(g);
-        if(first&&p1){const d=document.createElement('div');d.className='kraw-summary-portion';d.textContent=p1;first.insertAdjacentElement('afterend',d)}
-        if(g===1){
-          const second=row.querySelector('.kraw-side-meal.second');
-          const p2=secondPortion();
-          if(second&&p2){const d=document.createElement('div');d.className='kraw-summary-portion second';d.textContent=p2;second.insertAdjacentElement('afterend',d)}
-        }
+        const second=row.querySelector('.kraw-side-meal.second');
+        if(g===1){addPortion(first,firstPortion(1));addPortion(second,secondPortion(),true)}
+        else if(g===2){addPortion(first,firstPortion(2))}
+        else if(g===3){addPortion(first,group3Portion(1));addPortion(second,group3Portion(2),true)}
       });
     }catch(e){console.error('Personel özet porsiyon:',e)}
   }
@@ -76,10 +84,11 @@
       else if(g2&&txt.includes(g2))window.__krawLivePortions[2]=chosen;
       setTimeout(patch,50);
     }
-    if(e.target.closest?.('.secondportionchoice'))setTimeout(patch,50);
+    if(e.target.closest?.('.secondportionchoice,.g3portionchoice'))setTimeout(patch,50);
     if(e.target.closest?.('#saveBtn,#krawOrderConfirmBtn,.kraw-final-confirm button'))setTimeout(loadApiPortions,350);
   },true);
 
+  document.addEventListener('kraw-group3-portion-change',()=>setTimeout(patch,20));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadApiPortions()});
   setInterval(patch,1000);
   setInterval(loadApiPortions,5000);
