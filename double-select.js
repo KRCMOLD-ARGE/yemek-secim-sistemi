@@ -16,6 +16,10 @@
     return x;
   }
 
+  function notifyG3(){
+    try{document.dispatchEvent(new CustomEvent('kraw-group3-selection-change'))}catch(e){}
+  }
+
   function portionStorageKey(){
     try{return 'kraw_second_portion_'+(S?.user?.id||'user')+'_'+(S?.today||'today')}catch(e){return 'kraw_second_portion'}
   }
@@ -111,14 +115,24 @@
     const second=window.D2[g]?String(window.D2[g]):null;
     if(first===id){
       if(second){P[g]=second;window.D2[g]=null}else P[g]=null;
-      redraw();return;
+      redraw();
+      if(g===3)setTimeout(notifyG3,10);
+      return;
     }
-    if(second===id){window.D2[g]=null;schedulePaint();saveSecondNow();return}
-    if(!first){basePick(g,id);setTimeout(schedulePaint,20);return}
+    if(second===id){
+      window.D2[g]=null;schedulePaint();saveSecondNow();
+      if(g===3)setTimeout(notifyG3,10);
+      return;
+    }
+    if(!first){
+      basePick(g,id);setTimeout(schedulePaint,20);
+      if(g===3)setTimeout(notifyG3,25);
+      return;
+    }
     if(!second){
       window.D2[g]=id;schedulePaint();
       if(g===1){const m=(S.meals||[]).find(x=>String(x.id)===id);setTimeout(()=>askSecondPortion(m?.name||'2. yemek'),20)}
-      else saveSecondNow();
+      else {saveSecondNow();setTimeout(notifyG3,25)}
       return;
     }
     alert(g+'. grupta en fazla 2 yemek seçebilirsiniz. Değiştirmek istediğiniz seçime tekrar basarak önce kaldırın.');
