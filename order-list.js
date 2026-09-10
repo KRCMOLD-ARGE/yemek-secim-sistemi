@@ -46,7 +46,7 @@
       card.innerHTML=`<button type="button" class="kraw-order-close" aria-label="Kapat">×</button><div class="kraw-order-head"><h3>📋 Sipariş Listem</h3><div class="kraw-order-user">👤 ${esc2(S.user.full_name)}</div></div>`+
         [1,2,3,4].map(g=>{const s2=(g===1||g===3)?window.D2?.[g]:null;return `<div class="kraw-order-row"><div class="kraw-order-no">${g}</div><div><div class="kraw-order-meal">1. ${esc2(mealTitle(x[g]))}</div>${s2?`<div class="kraw-order-meal second">2. ${esc2(mealTitle(s2))}</div>`:''}<div class="kraw-order-label">${labels[g]}</div></div></div>`}).join('')+
         (saved?'<div class="kraw-order-ok">✅ Siparişiniz kaydedildi. İsterseniz pencereyi kapatıp seçimlerinizi değiştirebilirsiniz.</div>':'<div class="kraw-order-hint">Seçtiğiniz yemekleri kontrol edin.</div>')+
-        `<div class="kraw-order-actions"><button id="krawOrderCreateBtn" class="kraw-order-confirm kraw-order-create" type="button">✓ Siparişi Oluştur</button><button id="krawOrderUpdateBtn" class="kraw-order-confirm kraw-order-update" type="button">↻ Siparişi Güncelle</button></div>`;
+        `<div class="kraw-order-actions"><button id="krawOrderCreateBtn" class="kraw-order-confirm kraw-order-create" type="button">✓ Siparişi Onayla</button><button id="krawOrderUpdateBtn" class="kraw-order-confirm kraw-order-update" type="button">↻ Siparişi Güncelle</button></div>`;
       card.querySelector('.kraw-order-close').onclick=closeModal;
       card.querySelector('#krawOrderCreateBtn').onclick=()=>confirmOrder('create');
       card.querySelector('#krawOrderUpdateBtn').onclick=()=>confirmOrder('update');
