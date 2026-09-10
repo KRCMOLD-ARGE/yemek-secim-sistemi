@@ -69,7 +69,7 @@
     let box=g4.querySelector('.kraw-final-confirm');
     if(!box){
       box=document.createElement('div');box.className='kraw-final-confirm';
-      box.innerHTML='<p>Seçimlerinizi tamamladıysanız siparişinizi onaylayın.</p><button type="button">✓ Siparişi Onayla</button>';
+      box.innerHTML='<p>Seçimlerinizi tamamladıysanız siparişinizi oluşturun.</p><button type="button">✓ Siparişi Oluştur</button>';
       box.querySelector('button').onclick=()=>window.krawValidateAndConfirm?.();
       g4.appendChild(box);
     }
@@ -84,7 +84,7 @@
       const el=groups.querySelector('.group[data-g="'+g+'"]');if(el)el.classList.toggle('kraw-active-group',g===activeGroup);
       const b=document.querySelector('#krawGroupTabs .kraw-group-tab[data-g="'+g+'"]');if(b){b.classList.toggle('on',g===activeGroup);b.classList.toggle('done',!!P?.[g])}
     }
-    const save=document.getElementById('saveBtn');if(save){save.textContent='✓ Siparişi Onayla';save.onclick=window.krawValidateAndConfirm}
+    const save=document.getElementById('saveBtn');if(save){save.textContent='✓ Siparişi Oluştur';save.onclick=window.krawValidateAndConfirm}
     ensureFinalConfirm();
   }
   function schedulePaint(){if(paintQueued)return;paintQueued=true;requestAnimationFrame(paintNow)}
@@ -94,7 +94,7 @@
     const miss=missingGroups();
     if(miss.length){
       const names=miss.map(g=>g+'. Grup ('+LABELS[g]+')');
-      const text='Siparişi onaylamak için şu gruplardan seçim yapmalısınız: '+names.join(', ')+'.';
+      const text='Siparişi oluşturmak için şu gruplardan seçim yapmalısınız: '+names.join(', ')+'.';
       try{message('pm',text,true)}catch(e){alert(text)}
       activeGroup=miss[0];schedulePaint();
       document.getElementById('krawGroupTabs')?.scrollIntoView({behavior:'smooth',block:'start'});
